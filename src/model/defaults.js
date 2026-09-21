@@ -13,6 +13,9 @@ export const TYPE_DEFAULTS = {
 
 export const TYPE_NAMES = { arms: "Arms", crystals: "Crystal ring", plate: "Hex plate", ring: "Ring" };
 
+// Fill shading from a single light over the page; angle 0 = light at the top.
+export const LIGHT_DEFAULTS = { on: false, angle: 0, strength: 0.75, highlight: "#FFFFFF", shadow: "#1E4A9E" };
+
 export const PHOTO_DEFAULTS = { on: false, radius: 0.42, rim: 0.045, overhang: 0.09, icicles: 40, seed: 11, fill: 0.35, ridges: 1, width: 2 };
 
 let counter = 0;
@@ -29,6 +32,7 @@ export function normalizeDoc(d) {
     glowColor: d.glowColor || "#FFFFFF",
     glow: d.glow ?? 1,
     photo: { ...PHOTO_DEFAULTS, ...d.photo },
+    light: { ...LIGHT_DEFAULTS, ...d.light },
     layers: (d.layers || [])
       .filter((l) => TYPE_DEFAULTS[l.type])
       .map((l) => ({ ...STYLE_DEFAULTS, ...TYPE_DEFAULTS[l.type], ...l, id: newId() })),

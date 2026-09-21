@@ -29,6 +29,24 @@ export function hexPts(cx, cy, r, rot = 0, n = 6) {
   return p;
 }
 
+/**
+ * Clip a polygon to one side of the local y-axis (side = 1 keeps x >= 0, -1 keeps x <= 0).
+ * Sutherland–Hodgman against a half-plane, so concave outlines are fine too.
+ */
+export function clipHalf(pts, side) {
+  const out = [];
+  for (let i = 0; i < pts.length; i++) {
+    const p = pts[i], q = pts[(i + 1) % pts.length];
+    const pin = side * p[0] >= 0, qin = side * q[0] >= 0;
+    if (pin) out.push(p);
+    if (pin !== qin) {
+      const t = p[0] / (p[0] - q[0]);
+      out.push([0, p[1] + (q[1] - p[1]) * t]);
+    }
+  }
+  return out;
+}
+
 /** A crystal outline of length `len` along +y from the origin, half-width `w`, widest at fraction `wp`. */
 export function shapePts(kind, len, w, wp = 0.4) {
   switch (kind) {

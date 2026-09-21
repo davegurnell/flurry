@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { PALETTES, BACKGROUNDS } from "../model/palettes.js";
-import { PHOTO_SCHEMA, GLOW_SCHEMA } from "../model/schema.js";
+import { PHOTO_SCHEMA, GLOW_SCHEMA, LIGHT_SCHEMA } from "../model/schema.js";
 import { normalizeDoc } from "../model/defaults.js";
-import { patchDoc, patchPhoto, recolourAll } from "../state/history.js";
+import { patchDoc, patchPhoto, patchLight, recolourAll } from "../state/history.js";
 import { photoWidthShare } from "../engine/svg.js";
 import { read, write, KEYS } from "../lib/storage.js";
 import { Control, Controls } from "./Control.jsx";
@@ -13,7 +13,7 @@ export function ColourPanel({ design, bg, setBg, toast }) {
   function applyPalette(key) {
     const p = PALETTES[key];
     if (!p) return;
-    edit((d) => ({ ...recolourAll(p)(d), glowColor: p.glow }), true);
+    edit((d) => ({ ...recolourAll(p)(d), glowColor: p.glow, light: { ...d.light, highlight: p.highlight, shadow: p.shadow } }), true);
     setBg(p.bg);
     toast("Palette applied to every layer");
   }
@@ -39,6 +39,29 @@ export function ColourPanel({ design, bg, setBg, toast }) {
         </select>
       </div>
       <p className="note">The background is only for previewing. Downloads always have a transparent background.</p>
+    </section>
+  );
+}
+
+export function LightPanel({ design }) {
+  const { doc, edit, commit } = design;
+  const { light } = doc;
+  return (
+    <section>
+      <h2>Fill shading</h2>
+      <div className="ctl">
+        <label htmlFor="lightMode">Fill style</label>
+        <select id="lightMode" value={light.on ? "lit" : "flat"} onChange={(e) => edit(patchLight({ on: e.target.value === "lit" }), true)}>
+          <option value="flat">Flat · one colour per layer</option>
+          <option value="lit">Lit · shaded by a light source</option>
+        </select>
+      </div>
+      {light.on && <Controls specs={LIGHT_SCHEMA} obj={light} idPrefix="light" onChange={(p, done) => edit(patchLight(p), done)} onCommit={commit} />}
+      <p className="note">
+        {light.on
+          ? "Each crystal is split down its spine and each half is tilted slightly. The half facing the light blends toward the lit colour, the other toward the shaded colour. The layer's fill colour is the midtone."
+          : "Turn on Lit to shade each crystal as if light were shining across the page. It lifts the snowflake off the background."}
+      </p>
     </section>
   );
 }

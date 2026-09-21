@@ -6,7 +6,7 @@ import { read, write, KEYS } from "./lib/storage.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { LayerList } from "./components/LayerList.jsx";
 import { LayerInspector } from "./components/LayerInspector.jsx";
-import { ColourPanel, PhotoPanel, LibraryPanel } from "./components/SidePanels.jsx";
+import { ColourPanel, LightPanel, PhotoPanel, LibraryPanel } from "./components/SidePanels.jsx";
 import { Board } from "./components/Board.jsx";
 
 function useToast() {
@@ -39,6 +39,7 @@ export default function App() {
     let next = PRESETS[key].make();
     if (selected) next = recolourAll(selected)(next); // keep the colours the user has chosen
     next.glowColor = doc.glowColor;
+    next.light = doc.light;
     replace(next);
     setSelId(next.layers[0]?.id);
   }
@@ -66,6 +67,7 @@ export default function App() {
       <aside className="panel left">
         <LayerList design={design} selected={selected} onSelect={setSelId} />
         <ColourPanel design={design} bg={bg} setBg={setBg} toast={toast} />
+        <LightPanel design={design} />
         <PhotoPanel design={design} />
         <LibraryPanel design={design} toast={toast} />
       </aside>

@@ -34,6 +34,7 @@ export function historyReducer(s, action) {
 export const patchLayer = (id, patch) => (d) => ({ ...d, layers: d.layers.map((l) => (l.id === id ? { ...l, ...patch } : l)) });
 export const patchDoc = (patch) => (d) => ({ ...d, ...patch });
 export const patchPhoto = (patch) => (d) => ({ ...d, photo: { ...d.photo, ...patch } });
+export const patchLight = (patch) => (d) => ({ ...d, light: { ...d.light, ...patch } });
 export const recolourAll = (c) => (d) => ({ ...d, layers: d.layers.map((l) => ({ ...l, color: c.color, tint: c.tint, facet: c.facet })) });
 
 export function moveLayer(id, delta) {

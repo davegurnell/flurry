@@ -1,6 +1,6 @@
-import { makeLayer as L, PHOTO_DEFAULTS, STYLE_DEFAULTS } from "./defaults.js";
+import { makeLayer as L, PHOTO_DEFAULTS, LIGHT_DEFAULTS, STYLE_DEFAULTS } from "./defaults.js";
 
-const base = (name, layers, extra = {}) => ({ name, glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS }, layers, ...extra });
+const base = (name, layers, extra = {}) => ({ name, glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS }, light: { ...LIGHT_DEFAULTS }, layers, ...extra });
 
 export const PRESETS = {
   arendelle: {
@@ -83,5 +83,5 @@ export function randomDesign(prev, style = STYLE_DEFAULTS, r = Math.random) {
       ridges: 1, seed: 1 + Math.floor(r() * 200),
     }));
   }
-  return { name: "snowflake-" + Math.floor(r() * 9000 + 1000), glowColor: prev.glowColor, glow: prev.glow, photo: prev.photo, layers };
+  return { name: "snowflake-" + Math.floor(r() * 9000 + 1000), glowColor: prev.glowColor, glow: prev.glow, photo: prev.photo, light: prev.light, layers };
 }

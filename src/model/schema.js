@@ -64,4 +64,14 @@ export const PHOTO_SCHEMA = [
   R("fill", "Ice opacity", 0, 0.9, 0.01, pct), R("width", "Line weight", 0.3, 6, 0.1), R("ridges", "Etched facets", 0, 3, 1),
 ];
 
+const lightFrom = (v) => {
+  const named = { 0: "above", 90: "right", "-90": "left", 180: "below", "-180": "below" };
+  return named[v] ? `${deg(v)} · ${named[v]}` : deg(v);
+};
+
+export const LIGHT_SCHEMA = [
+  R("angle", "Light comes from", -180, 180, 1, lightFrom), R("strength", "Shading strength", 0, 1, 0.01, pct),
+  COLOR("highlight", "Lit side colour"), COLOR("shadow", "Shaded side colour"),
+];
+
 export const GLOW_SCHEMA = R("glow", "Glow strength", 0, 2, 0.05);

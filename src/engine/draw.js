@@ -13,13 +13,13 @@ function drawBranch(ink, kind, base, ang, len, wr, fronds) {
   if (kind === "line" || kind === "fern") ink.line([base, tip], 0.8);
   else if (kind === "needle") {
     ink.line([base, tip], 0.8);
-    ink.shape(place(shapePts("kite", len * 0.38, len * 0.08, 0.5), along(base, ang, len * 0.62), ang), { ridges: Math.min(1, ink.st.ridges) });
+    ink.crystal(shapePts("kite", len * 0.38, len * 0.08, 0.5), along(base, ang, len * 0.62), ang, { ridges: Math.min(1, ink.st.ridges) });
   } else if (kind === "plate") {
     const r = Math.max(0.004, len * wr * 0.55);
     ink.line([base, along(base, ang, len - r)], 0.8);
-    ink.shape(place(hexPts(0, len - r, r), base, ang), { ridges: Math.min(1, ink.st.ridges) });
+    ink.crystal(hexPts(0, len - r, r), base, ang, { ridges: Math.min(1, ink.st.ridges) });
   } else {
-    ink.shape(place(shapePts(kind, len, len * wr, 0.4), base, ang));
+    ink.crystal(shapePts(kind, len, len * wr, 0.4), base, ang);
     ink.line([base, along(base, ang, len * 0.92)], 0.55, 0.8);
   }
   const nf = kind === "fern" ? Math.max(3, fronds) : fronds;
@@ -32,13 +32,13 @@ function drawBranch(ink, kind, base, ang, len, wr, fronds) {
 function drawTip(ink, kind, end, a, ts) {
   if (kind === "none" || ts <= 0) return;
   const back = (d) => along(end, a, -d);
-  if (kind === "diamond") ink.shape(place(shapePts("kite", ts * 2.4, ts * 0.6, 0.45), back(ts * 1.2), a));
-  else if (kind === "spear") ink.shape(place(shapePts("kite", ts * 3.2, ts * 0.34, 0.62), back(ts * 2.2), a));
-  else if (kind === "arrow") ink.shape(place(shapePts("arrow", ts * 2.2, ts * 0.9), back(ts * 1.4), a));
-  else if (kind === "hex") ink.shape(place(hexPts(0, 0, ts * 0.9), end, a));
+  if (kind === "diamond") ink.crystal(shapePts("kite", ts * 2.4, ts * 0.6, 0.45), back(ts * 1.2), a);
+  else if (kind === "spear") ink.crystal(shapePts("kite", ts * 3.2, ts * 0.34, 0.62), back(ts * 2.2), a);
+  else if (kind === "arrow") ink.crystal(shapePts("arrow", ts * 2.2, ts * 0.9), back(ts * 1.4), a);
+  else if (kind === "hex") ink.crystal(hexPts(0, 0, ts * 0.9), end, a);
   else if (kind === "trident") {
     for (const [da, k] of [[0, 2.4], [28, 1.5], [-28, 1.5]]) {
-      ink.shape(place(shapePts("kite", ts * k, ts * 0.3, 0.3), back(ts * 0.4), a + da * D2R), { ridges: Math.min(1, ink.st.ridges) });
+      ink.crystal(shapePts("kite", ts * k, ts * 0.3, 0.3), back(ts * 0.4), a + da * D2R, { ridges: Math.min(1, ink.st.ridges) });
     }
   } else if (kind === "star") {
     for (let i = 0; i < 6; i++) ink.line([end, along(end, a + i * 60 * D2R, ts)], 0.7);
@@ -68,7 +68,7 @@ export function drawArms(ink, p, cx = 0, cy = 0, sc = 1, rot0 = 0) {
     const nl = Math.round(p.lozenges);
     for (let j = 0; j < nl; j++) {
       const t = p.r0 + span * (nl === 1 ? 0.52 : 0.3 + (0.45 * j) / (nl - 1));
-      ink.shape(place(shapePts("kite", p.lozSize * 2 * sc, p.lozSize * 0.42 * sc, 0.5), ax(t - p.lozSize), a));
+      ink.crystal(shapePts("kite", p.lozSize * 2 * sc, p.lozSize * 0.42 * sc, 0.5), ax(t - p.lozSize), a);
     }
     drawTip(ink, p.tip, ax(p.len), a, p.tipSize * sc);
   }
@@ -97,7 +97,7 @@ export function drawCrystals(ink, p) {
       : [[p.r0, a, span]];
     for (const [r, ang, len] of parts) {
       const base = polar(r, a);
-      ink.shape(place(shapePts(p.shape, len, w, p.widest), base, ang));
+      ink.crystal(shapePts(p.shape, len, w, p.widest), base, ang);
       if (p.spine) ink.line([base, along(base, ang, len * 0.94)], 0.55, 0.8);
     }
   }
@@ -159,6 +159,6 @@ export function drawPhoto(ink, ph) {
   // glints scattered on the rim
   for (let i = 0; i < n / 2; i++) {
     const a = rnd() * TAU, base = polar(rp + rw * (0.2 + 0.5 * rnd()), a);
-    ink.shape(place(shapePts("kite", rw * 1.4, rw * 0.28, 0.4), base, a + (rnd() - 0.5) * 1.2), { ridges: 0, fm: 1.2, wm: 0.45 });
+    ink.crystal(shapePts("kite", rw * 1.4, rw * 0.28, 0.4), base, a + (rnd() - 0.5) * 1.2, { ridges: 0, fm: 1.2, wm: 0.45 });
   }
 }

@@ -19,7 +19,7 @@ export function buildSVG(doc, { px = SIZE, preview = false } = {}) {
   for (let i = doc.layers.length - 1; i >= 0; i--) {
     const l = doc.layers[i];
     if (!l.visible) continue;
-    const ink = new Ink(l, doc.glowColor, doc.glow);
+    const ink = new Ink(l, doc.glowColor, doc.glow, doc.light);
     DRAW[l.type](ink, l);
     count += ink.count();
     groups.push(`<g id="${slug(l.name)}-${i + 1}">${ink.out()}</g>`);
@@ -32,7 +32,7 @@ export function buildSVG(doc, { px = SIZE, preview = false } = {}) {
     body = `<g clip-path="url(#photo-cut)">${body}</g>`;
     // The rim borrows its colours from the top visible layer.
     const style = { ...(doc.layers.find((l) => l.visible) || STYLE_DEFAULTS), ...doc.photo, glow: 1, opacity: 1 };
-    const ink = new Ink(style, doc.glowColor, doc.glow);
+    const ink = new Ink(style, doc.glowColor, doc.glow, doc.light);
     drawPhoto(ink, doc.photo);
     count += ink.count();
     body += `\n<g id="photo-rim">${ink.out()}</g>`;
