@@ -42,8 +42,8 @@ test("lit designs render cleanly with a range of shaded fills", () => {
   const fillColours = (svg) => new Set([...svg.matchAll(/<path fill="(#[0-9A-Fa-f]{6})"/g)].map((m) => m[1].toUpperCase()));
   for (const [key, preset] of Object.entries(PRESETS)) {
     const doc = preset.make();
-    const flat = fillColours(buildSVG(doc).svg);
-    doc.light = { ...doc.light, on: true };
+    assert.equal(doc.light.on, true, `${key} preset should be lit`);
+    const flat = fillColours(buildSVG({ ...doc, light: { ...doc.light, on: false } }).svg);
     const { svg } = buildSVG(doc);
     assert.doesNotMatch(svg, /NaN|undefined/, key);
     const lit = fillColours(svg);

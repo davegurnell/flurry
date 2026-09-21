@@ -1,6 +1,6 @@
 import { makeLayer as L, PHOTO_DEFAULTS, LIGHT_DEFAULTS, STYLE_DEFAULTS } from "./defaults.js";
 
-const base = (name, layers, extra = {}) => ({ name, glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS }, light: { ...LIGHT_DEFAULTS }, layers, ...extra });
+const base = (name, layers, extra = {}) => ({ name, glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS }, light: { ...LIGHT_DEFAULTS, on: true }, layers, ...extra });
 
 export const PRESETS = {
   arendelle: {

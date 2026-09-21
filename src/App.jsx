@@ -39,7 +39,7 @@ export default function App() {
     let next = PRESETS[key].make();
     if (selected) next = recolourAll(selected)(next); // keep the colours the user has chosen
     next.glowColor = doc.glowColor;
-    next.light = doc.light;
+    next.light = { ...doc.light, on: next.light.on }; // keep the user's light, but presets decide on/off
     replace(next);
     setSelId(next.layers[0]?.id);
   }
