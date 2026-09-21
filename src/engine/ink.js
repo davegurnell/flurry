@@ -21,8 +21,9 @@ export function circleD(r) {
 const GLOW_WIDE = 0, GLOW_NEAR = 1, LINE = 2, FACET = 3;
 
 export class Ink {
-  constructor(style, glowColor, glowAll, light = null) {
+  constructor(style, glowColor, glowAll, light = null, lineScale = 1) {
     this.st = style;
+    this.lineScale = lineScale; // design-wide line weight multiplier
     this.light = light?.on ? light : null;
     this.gc = glowColor;
     this.g = glowAll * style.glow;
@@ -40,7 +41,7 @@ export class Ink {
   }
 
   strokeD(d, wm = 1, am = 1) {
-    const st = this.st, w = st.width * wm * this.ws, a = st.opacity * am;
+    const st = this.st, w = st.width * wm * this.ws * this.lineScale, a = st.opacity * am;
     if (this.g > 0) {
       this.stroke(GLOW_WIDE, this.gc, w * 5, 0.09 * this.g * a, d);
       this.stroke(GLOW_NEAR, this.gc, w * 2.4, 0.22 * this.g * a, d);
@@ -121,7 +122,7 @@ export class Ink {
   }
 
   facet(d, wm, am) {
-    this.stroke(FACET, this.st.facet, this.st.width * wm * this.ws, am * this.st.opacity, d);
+    this.stroke(FACET, this.st.facet, this.st.width * wm * this.ws * this.lineScale, am * this.st.opacity, d);
   }
 
   fillD(d, am = 1, evenodd = true) {

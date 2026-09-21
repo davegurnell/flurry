@@ -11,12 +11,12 @@ export function downloadBlob(filename, blob) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-export const svgBlob = (doc) => new Blob([buildSVG(doc).svg], { type: "image/svg+xml" });
+export const svgBlob = (doc, part = "all") => new Blob([buildSVG(doc, { part }).svg], { type: "image/svg+xml" });
 
-/** Rasterise the design to a transparent PNG `px` pixels square. */
-export async function pngBlob(doc, px) {
+/** Rasterise the design (or one `part` of it) to a transparent PNG `px` pixels square. */
+export async function pngBlob(doc, px, part = "all") {
   const img = new Image();
-  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(buildSVG(doc, { px }).svg);
+  img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(buildSVG(doc, { px, part }).svg);
   await img.decode();
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = px;

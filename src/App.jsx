@@ -44,12 +44,14 @@ export default function App() {
       // A preset that is about its colours brings its own palette.
       next = recolourAll(palette)(next);
       next.glowColor = palette.glow;
+      next.lineWeight = doc.lineWeight;
       next.light = { ...next.light, highlight: palette.highlight, shadow: palette.shadow };
       setBg(palette.bg);
     } else {
       // Otherwise keep the colours and light the user has chosen; presets decide shading on/off.
       if (selected) next = recolourAll(selected)(next);
       next.glowColor = doc.glowColor;
+      next.lineWeight = doc.lineWeight;
       next.light = { ...doc.light, on: next.light.on };
     }
     replace(next);

@@ -83,3 +83,41 @@ test("normalizeDoc fills missing fields and drops unknown layer types", () => {
   assert.equal(d.photo.on, false);
   assertClean(buildSVG(d).svg);
 });
+
+test("photo designs split into a back part and a front part that together make the whole", () => {
+  const doc = PRESETS.frameShort.make();
+  const count = (part) => buildSVG(doc, { part }).count;
+  const back = buildSVG(doc, { part: "back" }).svg, front = buildSVG(doc, { part: "front" }).svg;
+  assert.equal(count("back") + count("front"), count("all"));
+  assert.match(back, /id="behind-photo"/);
+  assert.doesNotMatch(back, /photo-rim|frost-teeth/);
+  assert.match(front, /id="photo-rim"/);
+  assert.match(front, /id="frost-teeth-\d+"/);
+  assert.doesNotMatch(front, /crystal-spokes|clipPath/);
+  assertClean(back);
+  assertClean(front);
+});
+
+test("parts are ignored without a photo opening", () => {
+  const doc = PRESETS.frozen.make();
+  doc.layers[0].front = true;
+  assert.equal(buildSVG(doc, { part: "front" }).svg, buildSVG(doc).svg);
+});
+
+test("every photo-frame preset puts something in front and something behind", () => {
+  for (const [key, p] of Object.entries(PRESETS)) {
+    const doc = p.make();
+    if (!doc.photo.on) continue;
+    assert.ok(doc.layers.some((l) => l.front), `${key} has front layers`);
+    assert.ok(doc.layers.some((l) => !l.front), `${key} has back layers`);
+  }
+});
+
+test("line weight scales every stroke", () => {
+  const widths = (doc) => [...buildSVG(doc).svg.matchAll(/stroke-width="([\d.]+)"/g)].map((m) => +m[1]).sort((a, b) => a - b);
+  const doc = PRESETS.sparkle.make();
+  assert.equal(doc.lineWeight, 1.5);
+  const thick = widths(doc), thin = widths({ ...doc, lineWeight: 1 });
+  assert.equal(thick.length, thin.length);
+  thick.forEach((w, i) => assert.ok(Math.abs(w - thin[i] * 1.5) < 0.02, `${w} vs ${thin[i]}`));
+});

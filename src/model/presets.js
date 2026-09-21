@@ -1,7 +1,8 @@
-import { makeLayer as L, PHOTO_DEFAULTS, LIGHT_DEFAULTS, STYLE_DEFAULTS } from "./defaults.js";
+import { makeLayer as L, PHOTO_DEFAULTS, LIGHT_DEFAULTS, STYLE_DEFAULTS, LINE_WEIGHT_DEFAULT } from "./defaults.js";
 
-const base = (name, layers, extra = {}) => ({ name, glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS }, light: { ...LIGHT_DEFAULTS, on: true }, layers, ...extra });
+const base = (name, layers, extra = {}) => ({ name, glowColor: "#FFFFFF", glow: 1, lineWeight: LINE_WEIGHT_DEFAULT, photo: { ...PHOTO_DEFAULTS }, light: { ...LIGHT_DEFAULTS, on: true }, layers, ...extra });
 
+// Photo-frame layers marked `front: true` export with the rim, in front of the photo.
 // `group` sorts presets in the menu; `palette` (optional) sets the colours when
 // loading, otherwise a preset takes the colours already in use.
 export const PRESETS = {
@@ -37,7 +38,7 @@ export const PRESETS = {
     label: "Classic frame",
     group: "Photo frames",
     make: () => base("photo-frame", [
-      L("crystals", "Frost teeth", { count: 48, r0: 0.49, r1: 0.56, shape: "spike", cw: 0.022, alt: 0.55, ridges: 0, spine: false, jitter: 0.4, seed: 3 }),
+      L("crystals", "Frost teeth", { front: true, count: 48, r0: 0.49, r1: 0.56, shape: "spike", cw: 0.022, alt: 0.55, ridges: 0, spine: false, jitter: 0.4, seed: 3 }),
       L("arms", "Crystal spokes", { count: 8, r0: 0.47, len: 0.97, branches: 2, bStart: 0.25, bEnd: 0.6, angle: 42, bLen: 0.16, taper: 0.3, bShape: "kite", bWidth: 0.3, tip: "diamond", tipSize: 0.07, lozenges: 1, lozSize: 0.05, width: 3 }),
       L("crystals", "Leaf clusters", { count: 8, rot: 22.5, r0: 0.5, r1: 0.8, shape: "kite", cw: 0.07, widest: 0.45, ridges: 3, spine: true }),
       L("crystals", "Side shards", { count: 16, rot: 11.25, r0: 0.52, r1: 0.68, shape: "shard", cw: 0.035, widest: 0.5, ridges: 1, spine: false, seed: 9 }),
@@ -50,7 +51,7 @@ export const PRESETS = {
     label: "Classic frame · short arms",
     group: "Photo frames",
     make: () => base("photo-frame-short", [
-      L("crystals", "Frost teeth", { count: 64, r0: 0.665, r1: 0.725, shape: "spike", cw: 0.035, alt: 0.55, ridges: 0, spine: false, jitter: 0.4, seed: 3 }),
+      L("crystals", "Frost teeth", { front: true, count: 64, r0: 0.665, r1: 0.725, shape: "spike", cw: 0.035, alt: 0.55, ridges: 0, spine: false, jitter: 0.4, seed: 3 }),
       L("arms", "Crystal spokes", { count: 8, r0: 0.631, len: 0.97, branches: 2, bStart: 0.25, bEnd: 0.6, angle: 42, bLen: 0.11, taper: 0.3, bShape: "kite", bWidth: 0.375, tip: "diamond", tipSize: 0.06, lozenges: 1, lozSize: 0.042, width: 3 }),
       L("crystals", "Leaf clusters", { count: 8, rot: 22.5, r0: 0.651, r1: 0.855, shape: "kite", cw: 0.06, widest: 0.45, ridges: 3, spine: true }),
       L("crystals", "Side shards", { count: 16, rot: 11.25, r0: 0.665, r1: 0.773, shape: "shard", cw: 0.03, widest: 0.5, ridges: 1, spine: false, seed: 9 }),
@@ -61,7 +62,7 @@ export const PRESETS = {
     group: "Photo frames",
     make: () => base("frame-crystal-crown", [
       L("crystals", "Tiny snowflakes", { count: 12, rot: 15, r0: 0.84, r1: 0.98, shape: "flake", flakeStyle: "star", seed: 4, width: 2 }),
-      L("crystals", "Frost teeth", { count: 60, r0: 0.49, r1: 0.555, shape: "spike", cw: 0.02, alt: 0.5, ridges: 0, spine: false, jitter: 0.45, seed: 21 }),
+      L("crystals", "Frost teeth", { front: true, count: 60, r0: 0.49, r1: 0.555, shape: "spike", cw: 0.02, alt: 0.5, ridges: 0, spine: false, jitter: 0.45, seed: 21 }),
       L("arms", "Long spokes", {
         count: 6, r0: 0.47, len: 0.99, branches: 3, bStart: 0.12, bEnd: 0.62, angle: 38, bLen: 0.17, taper: 0.45, bShape: "kite", bWidth: 0.28,
         tip: "diamond", tipSize: 0.075, lozenges: 1, lozSize: 0.04, width: 3,
@@ -72,7 +73,7 @@ export const PRESETS = {
       }),
       L("crystals", "Crown blades", { count: 12, rot: 15, r0: 0.5, r1: 0.76, shape: "kite", cw: 0.045, widest: 0.3, ridges: 3, spine: true }),
       L("crystals", "Leaf ring", { count: 24, rot: 7.5, r0: 0.5, r1: 0.64, shape: "leaf", cw: 0.03, widest: 0.4, alt: 0.7, ridges: 1, spine: true }),
-      L("ring", "Rim line", { radius: 0.5, double: true, gap: 0.014, width: 1.6 }),
+      L("ring", "Rim line", { front: true, radius: 0.5, double: true, gap: 0.014, width: 1.6 }),
     ], { photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.44, rim: 0.05, overhang: 0.1, icicles: 48, seed: 17 } }),
   },
   frameFern: {
@@ -84,10 +85,10 @@ export const PRESETS = {
         count: 12, r0: 0.46, len: 0.97, branches: 5, bStart: 0.1, bEnd: 0.8, angle: 58, bLen: 0.13, taper: 0.7, bShape: "fern", fronds: 3,
         tip: "hex", tipSize: 0.03, lozenges: 0, width: 1.8,
       }),
-      L("crystals", "Shard fringe", { count: 36, rot: 5, r0: 0.47, r1: 0.6, shape: "shard", cw: 0.03, widest: 0.45, alt: 0.6, jitter: 0.5, ridges: 1, spine: false, seed: 13 }),
+      L("crystals", "Shard fringe", { front: true, count: 36, rot: 5, r0: 0.47, r1: 0.6, shape: "shard", cw: 0.03, widest: 0.45, alt: 0.6, jitter: 0.5, ridges: 1, spine: false, seed: 13 }),
       L("crystals", "Needles", { count: 24, rot: 7.5, r0: 0.5, r1: 0.7, shape: "spike", cw: 0.018, ridges: 0, spine: false }),
       L("ring", "Dotted ring", { radius: 0.72, dash: true, width: 1.4, glow: 0.6 }),
-      L("ring", "Rim line", { radius: 0.47, width: 1.6 }),
+      L("ring", "Rim line", { front: true, radius: 0.47, width: 1.6 }),
     ], { photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.42, rim: 0.045, overhang: 0.08, icicles: 40, seed: 5 } }),
   },
   frameSparkle: {
@@ -96,20 +97,20 @@ export const PRESETS = {
     make: () => base("frame-sparkle-ring", [
       L("crystals", "Tiny snowflakes", { count: 8, rot: 22.5, r0: 0.8, r1: 0.96, shape: "flake", flakeStyle: "star", width: 2 }),
       L("crystals", "Kite ring", { count: 24, r0: 0.54, r1: 0.72, shape: "kite", cw: 0.035, widest: 0.4, alt: 0.55, ridges: 2, spine: true }),
-      L("ring", "Rim line", { radius: 0.53, width: 1.8 }),
+      L("ring", "Rim line", { front: true, radius: 0.53, width: 1.8 }),
     ], { photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.5, rim: 0.035, overhang: 0.06, icicles: 36, seed: 2 } }),
   },
   frameHex: {
     label: "Hexagon window",
     group: "Photo frames",
     make: () => base("frame-hexagon-window", [
-      L("crystals", "Frost teeth", { count: 36, r0: 0.5, r1: 0.56, shape: "spike", cw: 0.02, alt: 0.6, ridges: 0, spine: false, jitter: 0.3, seed: 6 }),
+      L("crystals", "Frost teeth", { front: true, count: 36, r0: 0.5, r1: 0.56, shape: "spike", cw: 0.02, alt: 0.6, ridges: 0, spine: false, jitter: 0.3, seed: 6 }),
       L("arms", "Plate arms", {
         count: 6, r0: 0.5, len: 0.97, branches: 2, bStart: 0.2, bEnd: 0.65, angle: 60, bLen: 0.12, taper: 0.3, bShape: "plate", bWidth: 0.45,
         tip: "hex", tipSize: 0.06, lozenges: 0, width: 2.6,
       }),
       L("crystals", "Chevrons", { count: 6, rot: 30, r0: 0.52, r1: 0.78, shape: "chevron", cw: 0.12, ridges: 3, spine: false }),
-      L("ring", "Hexagon", { radius: 0.6, sides: 6, rot: 30, double: true, gap: 0.02, width: 2 }),
+      L("ring", "Hexagon", { front: true, radius: 0.6, sides: 6, rot: 30, double: true, gap: 0.02, width: 2 }),
     ], { photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.45, rim: 0.04, overhang: 0.08, icicles: 42, seed: 9 } }),
   },
   fern: {
@@ -177,5 +178,5 @@ export function randomDesign(prev, style = STYLE_DEFAULTS, r = Math.random) {
       ridges: 1, seed: 1 + Math.floor(r() * 200),
     }));
   }
-  return { name: "snowflake-" + Math.floor(r() * 9000 + 1000), glowColor: prev.glowColor, glow: prev.glow, photo: prev.photo, light: prev.light, layers };
+  return { name: "snowflake-" + Math.floor(r() * 9000 + 1000), glowColor: prev.glowColor, glow: prev.glow, lineWeight: prev.lineWeight, photo: prev.photo, light: prev.light, layers };
 }

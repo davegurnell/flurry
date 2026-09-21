@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PALETTES, BACKGROUNDS } from "../model/palettes.js";
-import { PHOTO_SCHEMA, GLOW_SCHEMA, LIGHT_SCHEMA } from "../model/schema.js";
+import { PHOTO_SCHEMA, GLOW_SCHEMA, LIGHT_SCHEMA, LINE_WEIGHT_SCHEMA } from "../model/schema.js";
 import { normalizeDoc } from "../model/defaults.js";
 import { patchDoc, patchPhoto, patchLight, recolourAll } from "../state/history.js";
 import { photoWidthShare } from "../engine/svg.js";
@@ -30,6 +30,8 @@ export function ColourPanel({ design, bg, setBg, toast }) {
       </div>
       <Control spec={{ k: "glowColor", label: "Glow colour", t: "color" }} value={doc.glowColor} idPrefix="doc"
         onChange={(v) => edit(patchDoc({ glowColor: v }))} onCommit={commit} />
+      <Control spec={LINE_WEIGHT_SCHEMA} value={doc.lineWeight} idPrefix="doc"
+        onChange={(v, done) => edit(patchDoc({ lineWeight: v }), done)} onCommit={commit} />
       <Control spec={GLOW_SCHEMA} value={doc.glow} idPrefix="doc"
         onChange={(v, done) => edit(patchDoc({ glow: v }), done)} onCommit={commit} />
       <div className="ctl">
@@ -78,10 +80,17 @@ export function PhotoPanel({ design }) {
       </div>
       {photo.on && <Controls specs={PHOTO_SCHEMA} obj={photo} idPrefix="ph" onChange={(p, done) => edit(patchPhoto(p), done)} onCommit={commit} />}
       {photo.on ? (
-        <p className="note">
-          In Canva, put your photo in a circle frame <b>{(photoWidthShare(photo) * 100).toFixed(1)}%</b> of this graphic's width,
-          centred underneath it. The dashed guide shows the edge and is not exported.
-        </p>
+        <>
+          <p className="note">
+            In Canva, put your photo in a circle frame <b>{(photoWidthShare(photo) * 100).toFixed(1)}%</b> of this graphic's width,
+            centred on it. The shaded disc shows where the photo goes and is not exported.
+          </p>
+          <p className="note">
+            To let the frost sit over the photo, export <b>Behind the photo</b> and <b>In front of the photo</b> separately
+            (Export part, top bar). In Canva stack them back part, photo, front part, all centred and with the two parts at the same size.
+            Layers ticked <b>In front of the photo</b> go in the front part, along with the icy rim.
+          </p>
+        </>
       ) : (
         <p className="note">Turn this on to cut a round opening in the middle with icicles hanging over its edge.</p>
       )}

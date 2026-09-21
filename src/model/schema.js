@@ -74,4 +74,6 @@ export const LIGHT_SCHEMA = [
   COLOR("highlight", "Lit side colour"), COLOR("shadow", "Shaded side colour"),
 ];
 
+export const LINE_WEIGHT_SCHEMA = R("lineWeight", "Line weight · every layer", 0.5, 3, 0.05, (v) => "×" + (+v).toFixed(2));
+
 export const GLOW_SCHEMA = R("glow", "Glow strength", 0, 2, 0.05);

@@ -39,7 +39,7 @@ export function LayerList({ design, selected, onSelect }) {
             />
             <button type="button" className="pick" aria-pressed={l.id === selected?.id} onClick={() => onSelect(l.id)}>
               <span>{l.name || "Untitled"}</span>
-              <span className="chip">{TYPE_NAMES[l.type]}</span>
+              <span className="chip">{doc.photo.on && l.front ? "Front · " : ""}{TYPE_NAMES[l.type]}</span>
             </button>
           </li>
         ))}

@@ -16,13 +16,16 @@ export const TYPE_NAMES = { arms: "Arms", crystals: "Crystal ring", plate: "Hex 
 // Fill shading from a single light over the page; angle 0 = light at the top.
 export const LIGHT_DEFAULTS = { on: false, angle: 0, strength: 0.75, highlight: "#FFFFFF", shadow: "#1E4A9E" };
 
+// Multiplies every line in the design; 1.5 since lines were thickened across the board.
+export const LINE_WEIGHT_DEFAULT = 1.5;
+
 export const PHOTO_DEFAULTS = { on: false, radius: 0.42, rim: 0.045, overhang: 0.09, icicles: 40, seed: 11, fill: 0.35, ridges: 1, width: 2 };
 
 let counter = 0;
 export const newId = () => `L${Date.now().toString(36)}${(counter++).toString(36)}`;
 
 export const makeLayer = (type, name, over = {}) => ({
-  id: newId(), type, name, visible: true, ...STYLE_DEFAULTS, ...TYPE_DEFAULTS[type], ...over,
+  id: newId(), type, name, visible: true, front: false, ...STYLE_DEFAULTS, ...TYPE_DEFAULTS[type], ...over,
 });
 
 /** Fill in anything missing from a stored design and give its layers fresh ids. */
@@ -31,10 +34,11 @@ export function normalizeDoc(d) {
     name: d.name || "snowflake",
     glowColor: d.glowColor || "#FFFFFF",
     glow: d.glow ?? 1,
+    lineWeight: d.lineWeight ?? LINE_WEIGHT_DEFAULT,
     photo: { ...PHOTO_DEFAULTS, ...d.photo },
     light: { ...LIGHT_DEFAULTS, ...d.light },
     layers: (d.layers || [])
       .filter((l) => TYPE_DEFAULTS[l.type])
-      .map((l) => ({ ...STYLE_DEFAULTS, ...TYPE_DEFAULTS[l.type], ...l, id: newId() })),
+      .map((l) => ({ front: false, ...STYLE_DEFAULTS, ...TYPE_DEFAULTS[l.type], ...l, id: newId() })),
   };
 }

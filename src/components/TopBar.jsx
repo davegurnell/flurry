@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PRESETS } from "../model/presets.js";
-import { slug } from "../engine/svg.js";
+import { slug, PARTS } from "../engine/svg.js";
 import { downloadBlob, svgBlob, pngBlob } from "../lib/download.js";
 
 const PNG_SIZES = [2000, 4000, 6000];
@@ -11,12 +11,14 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
   const [pngPx, setPngPx] = useState(4000);
   const [rendering, setRendering] = useState(false);
   const [copying, setCopying] = useState(false);
-  const base = slug(doc.name) || "snowflake";
+  const [partChoice, setPart] = useState("all");
+  const part = doc.photo.on ? partChoice : "all";
+  const base = (slug(doc.name) || "snowflake") + (part === "all" ? "" : part === "front" ? "-front" : "-back");
 
   async function downloadPng() {
     setRendering(true);
     try {
-      downloadBlob(`${base}-${pngPx}px.png`, await pngBlob(doc, pngPx));
+      downloadBlob(`${base}-${pngPx}px.png`, await pngBlob(doc, pngPx, part));
     } catch {
       toast("This browser couldn't render the PNG. Download the SVG instead.");
     }
@@ -33,8 +35,8 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
     }
     setCopying(true);
     try {
-      await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob(doc, pngPx) })]);
-      toast(`Copied a ${pngPx} px image. Paste it into Canva.`);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob(doc, pngPx, part) })]);
+      toast(`Copied ${part === "all" ? "a" : `the ${part} part as a`} ${pngPx} px image. Paste it into Canva.`);
     } catch {
       toast("Your browser blocked the clipboard. Use Download SVG instead.");
     }
@@ -61,7 +63,12 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
       <div className="cluster">
         <label className="note" htmlFor="docName">File name</label>
         <input id="docName" type="text" size={16} value={doc.name} onChange={(e) => edit((d) => ({ ...d, name: e.target.value }))} onBlur={commit} />
-        <button type="button" className="primary" onClick={() => downloadBlob(`${base}.svg`, svgBlob(doc))}>Download SVG</button>
+        {doc.photo.on && (
+          <select id="exportPart" aria-label="Export part" value={partChoice} onChange={(e) => setPart(e.target.value)}>
+            {Object.entries(PARTS).map(([k, n]) => <option key={k} value={k}>{n}</option>)}
+          </select>
+        )}
+        <button type="button" className="primary" onClick={() => downloadBlob(`${base}.svg`, svgBlob(doc, part))}>Download SVG</button>
         <select id="pngSize" aria-label="PNG size" value={pngPx} onChange={(e) => setPngPx(+e.target.value)}>
           {PNG_SIZES.map((n) => <option key={n} value={n}>{n} px</option>)}
         </select>
