@@ -4,6 +4,7 @@ import { slug } from "../engine/svg.js";
 import { downloadBlob, svgBlob, pngBlob } from "../lib/download.js";
 
 const PNG_SIZES = [2000, 4000, 6000];
+const PRESET_GROUPS = [...new Set(Object.values(PRESETS).map((p) => p.group))];
 
 export function TopBar({ design, onPreset, onRandom, toast }) {
   const { doc, edit, commit, undo, canUndo } = design;
@@ -47,7 +48,11 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
         <label className="note" htmlFor="presetSel">Start from</label>
         <select id="presetSel" value="" onChange={(e) => e.target.value && onPreset(e.target.value)}>
           <option value="">Choose a preset…</option>
-          {Object.entries(PRESETS).map(([k, p]) => <option key={k} value={k}>{p.label}</option>)}
+          {PRESET_GROUPS.map((g) => (
+            <optgroup key={g} label={g}>
+              {Object.entries(PRESETS).filter(([, p]) => p.group === g).map(([k, p]) => <option key={k} value={k}>{p.label}</option>)}
+            </optgroup>
+          ))}
         </select>
         <button type="button" onClick={onRandom}>Surprise me</button>
         <button type="button" onClick={undo} disabled={!canUndo}>Undo</button>

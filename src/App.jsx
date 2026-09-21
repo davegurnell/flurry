@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useDesign } from "./state/useDesign.js";
 import { recolourAll } from "./state/history.js";
 import { PRESETS, randomDesign } from "./model/presets.js";
+import { PALETTES } from "./model/palettes.js";
 import { read, write, KEYS } from "./lib/storage.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { LayerList } from "./components/LayerList.jsx";
@@ -36,10 +37,21 @@ export default function App() {
   const setBg = (v) => { setBgState(v); write(KEYS.bg, v); };
 
   function loadPreset(key) {
-    let next = PRESETS[key].make();
-    if (selected) next = recolourAll(selected)(next); // keep the colours the user has chosen
-    next.glowColor = doc.glowColor;
-    next.light = { ...doc.light, on: next.light.on }; // keep the user's light, but presets decide on/off
+    const preset = PRESETS[key];
+    let next = preset.make();
+    const palette = PALETTES[preset.palette];
+    if (palette) {
+      // A preset that is about its colours brings its own palette.
+      next = recolourAll(palette)(next);
+      next.glowColor = palette.glow;
+      next.light = { ...next.light, highlight: palette.highlight, shadow: palette.shadow };
+      setBg(palette.bg);
+    } else {
+      // Otherwise keep the colours and light the user has chosen; presets decide shading on/off.
+      if (selected) next = recolourAll(selected)(next);
+      next.glowColor = doc.glowColor;
+      next.light = { ...doc.light, on: next.light.on };
+    }
     replace(next);
     setSelId(next.layers[0]?.id);
   }
