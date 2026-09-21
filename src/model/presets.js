@@ -43,6 +43,18 @@ export const PRESETS = {
       L("crystals", "Side shards", { count: 16, rot: 11.25, r0: 0.52, r1: 0.68, shape: "shard", cw: 0.035, widest: 0.5, ridges: 1, spine: false, seed: 9 }),
     ], { photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.46, overhang: 0.09, icicles: 44 } }),
   },
+  // The classic frame with its decoration band halved relative to the photo,
+  // then scaled up to fill the canvas (radius r -> 1.357 * (0.46 + (r - 0.46) / 2)).
+  frameShort: {
+    label: "Classic frame · short arms",
+    group: "Photo frames",
+    make: () => base("photo-frame-short", [
+      L("crystals", "Frost teeth", { count: 64, r0: 0.665, r1: 0.725, shape: "spike", cw: 0.028, alt: 0.55, ridges: 0, spine: false, jitter: 0.4, seed: 3 }),
+      L("arms", "Crystal spokes", { count: 8, r0: 0.631, len: 0.97, branches: 2, bStart: 0.25, bEnd: 0.6, angle: 42, bLen: 0.11, taper: 0.3, bShape: "kite", bWidth: 0.3, tip: "diamond", tipSize: 0.048, lozenges: 1, lozSize: 0.034, width: 3 }),
+      L("crystals", "Leaf clusters", { count: 8, rot: 22.5, r0: 0.651, r1: 0.855, shape: "kite", cw: 0.048, widest: 0.45, ridges: 3, spine: true }),
+      L("crystals", "Side shards", { count: 16, rot: 11.25, r0: 0.665, r1: 0.773, shape: "shard", cw: 0.024, widest: 0.5, ridges: 1, spine: false, seed: 9 }),
+    ], { photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.624, rim: 0.05, overhang: 0.09, icicles: 60 } }),
+  },
   frameCrown: {
     label: "Crystal crown (complex)",
     group: "Photo frames",
