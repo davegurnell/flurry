@@ -2,7 +2,6 @@ import { useState } from "react";
 import { PRESETS } from "../model/presets.js";
 import { slug } from "../engine/svg.js";
 import { downloadBlob, svgBlob, pngBlob } from "../lib/download.js";
-import { buildSVG } from "../engine/svg.js";
 
 const PNG_SIZES = [2000, 4000, 6000];
 
@@ -10,6 +9,7 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
   const { doc, edit, commit, undo, canUndo } = design;
   const [pngPx, setPngPx] = useState(4000);
   const [rendering, setRendering] = useState(false);
+  const [copying, setCopying] = useState(false);
   const base = slug(doc.name) || "snowflake";
 
   async function downloadPng() {
@@ -22,13 +22,22 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
     setRendering(false);
   }
 
-  async function copySvg() {
+  // Canva pastes clipboard images but not SVG text, and browsers only copy PNG
+  // reliably, so this copies a transparent PNG at the chosen size.
+  // The PNG is passed as a promise so Safari still counts the click as the gesture.
+  async function copyImage() {
+    if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+      toast("This browser can't copy images. Use Download SVG instead.");
+      return;
+    }
+    setCopying(true);
     try {
-      await navigator.clipboard.writeText(buildSVG(doc).svg);
-      toast("SVG code copied");
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob(doc, pngPx) })]);
+      toast(`Copied a ${pngPx} px image. Paste it into Canva.`);
     } catch {
       toast("Your browser blocked the clipboard. Use Download SVG instead.");
     }
+    setCopying(false);
   }
 
   return (
@@ -52,7 +61,7 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
           {PNG_SIZES.map((n) => <option key={n} value={n}>{n} px</option>)}
         </select>
         <button type="button" onClick={downloadPng} disabled={rendering}>{rendering ? "Rendering…" : "Download PNG"}</button>
-        <button type="button" onClick={copySvg}>Copy SVG code</button>
+        <button type="button" onClick={copyImage} disabled={copying}>{copying ? "Copying…" : "Copy image"}</button>
       </div>
     </header>
   );
