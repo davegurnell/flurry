@@ -1,0 +1,13 @@
+[Unit]
+Description=Letters from the Sky (Vite dev server on :8000)
+After=network.target
+
+[Service]
+User=exedev
+WorkingDirectory=/home/exedev/snowflake
+ExecStart=/usr/bin/npm run dev
+Restart=on-failure
+Environment=NODE_ENV=development
+
+[Install]
+WantedBy=multi-user.target

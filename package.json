@@ -1,0 +1,21 @@
+{
+  "name": "letters-from-the-sky",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Layered snowflake designer that exports crisp, transparent SVGs and PNGs for print.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test src/"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.19"
+  }
+}

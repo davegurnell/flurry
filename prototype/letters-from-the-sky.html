@@ -1,0 +1,855 @@
+<title>Letters from the Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Italiana&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ink: #060F24;
+    --midnight: #0B1A3A;
+    --well: #081430;
+    --line: #1E3563;
+    --frost: #CFE8FF;
+    --muted: #8599C2;
+    --glacier: #7CC4FF;
+    --display: "Italiana", "Didot", "Bodoni 72", Georgia, serif;
+    --body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  html, body { height: 100%; }
+  body { background: var(--ink); color: var(--frost); font: 14px/1.45 var(--body); }
+  button, select, input { font: inherit; color: inherit; }
+
+  .app {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 272px minmax(0, 1fr) 312px;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "top top top" "left stage right";
+  }
+
+  /* ---------- top bar ---------- */
+  .top {
+    grid-area: top; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+    padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--midnight);
+  }
+  .brand { font: 400 26px/1 var(--display); margin: 0; white-space: nowrap; }
+  .top .grow { flex: 1; }
+  .cluster { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+  select, input[type="text"], input[type="number"] {
+    background: var(--ink); border: 1px solid var(--line); padding: 7px 8px; border-radius: 0; min-width: 0;
+  }
+  button {
+    background: transparent; border: 1px solid var(--line); padding: 8px 12px; cursor: pointer;
+    font-weight: 500; border-radius: 0; white-space: nowrap;
+  }
+  button:hover { border-color: var(--muted); }
+  button.primary { background: var(--frost); color: var(--ink); border-color: var(--frost); font-weight: 600; }
+  button.primary:hover { background: #fff; }
+  button:disabled { opacity: 0.4; cursor: default; }
+  :focus-visible { outline: 2px solid var(--glacier); outline-offset: 2px; }
+
+  /* ---------- side panels ---------- */
+  .panel { overflow-y: auto; padding: 18px 18px 28px; display: flex; flex-direction: column; gap: 22px; background: var(--midnight); }
+  .left { grid-area: left; border-right: 1px solid var(--line); }
+  .right { grid-area: right; border-left: 1px solid var(--line); }
+  .panel h2 {
+    margin: 0 0 10px; font: 500 11px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .panel h3 { margin: 4px 0 8px; font: 400 18px/1.2 var(--display); color: var(--frost); }
+
+  .layers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; border: 1px solid var(--line); }
+  .layers li { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
+  .layers li:last-child { border-bottom: 0; }
+  .layers li.sel { background: rgba(124,196,255,0.12); box-shadow: inset 2px 0 0 var(--glacier); }
+  .layers .pick { flex: 1; border: 0; text-align: left; padding: 9px 10px; display: flex; justify-content: space-between; gap: 8px; min-width: 0; }
+  .layers .pick span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .layers .chip { font: 10px/1.6 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .layers input[type="checkbox"] { margin: 0 10px; accent-color: var(--glacier); width: 16px; height: 16px; flex: none; }
+  .layers li.hidden .pick { opacity: 0.45; }
+  .layer-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+  .layer-tools button { padding: 7px 4px; font-size: 12px; }
+  .add-row { display: flex; gap: 6px; margin-top: 8px; }
+  .add-row select { flex: 1; }
+
+  .ctl { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; margin-bottom: 10px; }
+  .ctl label { color: var(--muted); font-size: 13px; }
+  .ctl output { font: 12px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--frost); }
+  .ctl input[type="range"] { grid-column: 1 / -1; width: 100%; margin: 2px 0 0; accent-color: var(--glacier); }
+  .ctl select, .ctl input[type="text"] { grid-column: 1 / -1; width: 100%; }
+  .ctl.check { grid-template-columns: 1fr auto; }
+  .ctl.check input { width: 16px; height: 16px; accent-color: var(--glacier); margin: 0; }
+  .ctl input[type="color"] { width: 44px; height: 26px; padding: 0; border: 1px solid var(--line); background: none; cursor: pointer; }
+  .group + .group { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 4px; }
+  .note { color: var(--muted); font-size: 12px; margin: 0; }
+  .note b { color: var(--frost); font-weight: 500; font-family: var(--mono); }
+
+  .library { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+  .library li { display: flex; gap: 4px; }
+  .library li button:first-child { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- stage ---------- */
+  .stage { grid-area: stage; display: flex; flex-direction: column; min-height: 0; background: var(--ink); }
+  .canvas-area { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .board {
+    position: relative; aspect-ratio: 1 / 1; width: min(100%, calc(100vh - 150px)); max-width: 100%;
+    border: 1px solid var(--line);
+  }
+  .board svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .board[data-bg="frost"] { background: radial-gradient(circle at 50% 45%, #FFFFFF 0%, #E4EFFB 45%, #B7CFEE 100%); }
+  .board[data-bg="night"] { background: radial-gradient(circle at 50% 45%, #1B4FA0 0%, #0E2F6E 55%, #061738 100%); }
+  .board[data-bg="checker"] {
+    background-color: #D7DEE8;
+    background-image: conic-gradient(#B9C3D2 25%, transparent 0 50%, #B9C3D2 0 75%, transparent 0);
+    background-size: 24px 24px;
+  }
+  .stage-bar {
+    display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between;
+    padding: 10px 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;
+  }
+  .stage-bar .stats { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    background: var(--frost); color: var(--ink); padding: 10px 16px; font-weight: 500; pointer-events: none;
+    opacity: 0; transition: opacity .2s;
+  }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 1080px) {
+    .app { grid-template-columns: 260px minmax(0, 1fr); grid-template-areas: "top top" "left stage" "right right"; grid-template-rows: auto minmax(0, 1fr) auto; }
+    .right { border-left: 0; border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 760px) {
+    html, body { height: auto; }
+    .app { display: flex; flex-direction: column; height: auto; }
+    .top { padding: 12px 16px; }
+    .stage { order: 1; }
+    .left { order: 2; border-right: 0; border-top: 1px solid var(--line); }
+    .right { order: 3; }
+    .panel { padding: 18px 16px 24px; overflow: visible; }
+    .canvas-area { padding: 12px 16px; }
+    .board { width: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+
+<div class="app">
+  <header class="top">
+    <h1 class="brand">Letters from the Sky</h1>
+    <div class="cluster">
+      <label class="note" for="presetSel">Start from</label>
+      <select id="presetSel">
+        <option value="">Choose a preset…</option>
+        <option value="arendelle">Arendelle star</option>
+        <option value="frame">Photo frame</option>
+        <option value="fern">Fernlike dendrite</option>
+        <option value="plate">Sectored plate</option>
+        <option value="sparkle">Small sparkle</option>
+      </select>
+      <button id="randomBtn" type="button">Surprise me</button>
+      <button id="undoBtn" type="button" disabled>Undo</button>
+    </div>
+    <div class="grow"></div>
+    <div class="cluster">
+      <label class="note" for="docName">File name</label>
+      <input id="docName" type="text" value="arendelle-star" size="16">
+      <button id="svgBtn" class="primary" type="button">Download SVG</button>
+      <select id="pngSize" aria-label="PNG size">
+        <option value="2000">2000 px</option>
+        <option value="4000" selected>4000 px</option>
+        <option value="6000">6000 px</option>
+      </select>
+      <button id="pngBtn" type="button">Download PNG</button>
+      <button id="copyBtn" type="button">Copy SVG code</button>
+    </div>
+  </header>
+
+  <aside class="panel left">
+    <section>
+      <h2>Layers · top to bottom</h2>
+      <ul class="layers" id="layerList"></ul>
+      <div class="layer-tools">
+        <button id="upBtn" type="button">Up</button>
+        <button id="downBtn" type="button">Down</button>
+        <button id="dupBtn" type="button">Copy</button>
+        <button id="delBtn" type="button">Delete</button>
+      </div>
+      <div class="add-row">
+        <select id="addSel" aria-label="Layer type to add">
+          <option value="arms">Arms</option>
+          <option value="crystals">Crystal ring</option>
+          <option value="plate">Hex plate</option>
+          <option value="ring">Ring</option>
+        </select>
+        <button id="addBtn" type="button">Add layer</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Colour</h2>
+      <div class="ctl">
+        <label for="paletteSel">Palette for every layer</label>
+        <select id="paletteSel">
+          <option value="">Apply a palette…</option>
+          <option value="frost">Royal ice · for pale backgrounds</option>
+          <option value="moon">Moonlight · for dark backgrounds</option>
+          <option value="silver">Silver frost</option>
+          <option value="aurora">Aurora · violet and teal</option>
+        </select>
+      </div>
+      <div class="ctl"><label for="glowColor">Glow colour</label><input type="color" id="glowColor" value="#ffffff"></div>
+      <div class="ctl"><label for="glowAll">Glow strength</label><output id="glowAllOut"></output><input type="range" id="glowAll" min="0" max="2" step="0.05"></div>
+      <div class="ctl">
+        <label for="bgSel">Preview background</label>
+        <select id="bgSel">
+          <option value="frost">Pale frost (like your poster)</option>
+          <option value="night">Night blue</option>
+          <option value="checker">Checkerboard (shows transparency)</option>
+        </select>
+      </div>
+      <p class="note">The background is only for previewing. Downloads always have a transparent background.</p>
+    </section>
+
+    <section>
+      <h2>Photo opening</h2>
+      <div class="ctl check"><label for="photoOn">Leave a space for a photo</label><input type="checkbox" id="photoOn"></div>
+      <div id="photoCtls"></div>
+      <p class="note" id="photoNote"></p>
+    </section>
+
+    <section>
+      <h2>Saved designs</h2>
+      <button id="saveBtn" type="button">Save this design</button>
+      <ul class="library" id="library"></ul>
+      <p class="note" id="libNote">Saved designs are kept in this browser.</p>
+    </section>
+  </aside>
+
+  <main class="stage">
+    <div class="canvas-area">
+      <div class="board" id="board" data-bg="frost"></div>
+    </div>
+    <div class="stage-bar">
+      <span id="stageHint">Transparent SVG · 1000 × 1000 · scales to any print size</span>
+      <span class="stats" id="stats"></span>
+    </div>
+  </main>
+
+  <aside class="panel right" id="props"></aside>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const TAU = Math.PI * 2, D2R = Math.PI / 180;
+  const SIZE = 1000, C = 500, K = 460; // viewBox, centre, pixels per unit radius
+
+  /* ================= palettes & presets ================= */
+  const PALETTES = {
+    frost:  { color: "#2B5FB8", tint: "#9DC2EE", facet: "#FFFFFF", glow: "#FFFFFF", bg: "frost" },
+    moon:   { color: "#FFFFFF", tint: "#BFE3FF", facet: "#DDF1FF", glow: "#6DB8FF", bg: "night" },
+    silver: { color: "#5E7699", tint: "#D3E1F2", facet: "#FFFFFF", glow: "#FFFFFF", bg: "frost" },
+    aurora: { color: "#5B4FC4", tint: "#9FE3E0", facet: "#FFFFFF", glow: "#E9F7FF", bg: "frost" },
+  };
+  const STYLE_DEFAULTS = { color: "#2B5FB8", tint: "#9DC2EE", facet: "#FFFFFF", width: 3, fill: 0.42, ridges: 2, glow: 1, opacity: 1 };
+  const TYPE_DEFAULTS = {
+    arms: { count: 6, rot: 0, r0: 0, len: 0.95, rails: false, branches: 3, bStart: 0.3, bEnd: 0.75, angle: 58, bLen: 0.3,
+            taper: 0.5, bShape: "leaf", bWidth: 0.26, fronds: 0, tip: "diamond", tipSize: 0.08, lozenges: 1, lozSize: 0.06 },
+    crystals: { count: 12, rot: 0, r0: 0.5, r1: 0.75, dir: "out", shape: "kite", cw: 0.07, widest: 0.4, alt: 1, jitter: 0,
+                seed: 7, spine: true, flakeStyle: "star" },
+    plate: { sides: 6, radius: 0.16, rings: 3, rot: 0, star: 0, spokes: true },
+    ring: { radius: 0.6, sides: 0, rot: 0, double: false, gap: 0.02, dash: false },
+  };
+  const TYPE_NAMES = { arms: "Arms", crystals: "Crystal ring", plate: "Hex plate", ring: "Ring" };
+
+  let uid = 1;
+  const L = (type, name, over = {}) => ({ id: "L" + (uid++), type, name, visible: true, ...STYLE_DEFAULTS, ...TYPE_DEFAULTS[type], ...over });
+
+  const PHOTO_DEFAULTS = { on: false, radius: 0.42, rim: 0.045, overhang: 0.09, icicles: 40, seed: 11, fill: 0.35, ridges: 1, width: 2 };
+
+  const PRESETS = {
+    arendelle: () => ({
+      name: "arendelle-star", glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS },
+      layers: [
+        L("plate", "Core plate", { radius: 0.15, rings: 3, ridges: 1 }),
+        L("arms", "Main arms", { len: 0.97, branches: 3, bStart: 0.28, bEnd: 0.7, angle: 52, bLen: 0.3, taper: 0.55, bShape: "kite", bWidth: 0.22, tip: "diamond", tipSize: 0.085, lozenges: 1, lozSize: 0.055, width: 3.4 }),
+        L("arms", "Short arms", { rot: 30, r0: 0.06, len: 0.64, branches: 1, bStart: 0.55, bEnd: 0.55, angle: 42, bLen: 0.12, bShape: "kite", bWidth: 0.25, tip: "spear", tipSize: 0.07, lozenges: 1, lozSize: 0.05, width: 2.6 }),
+        L("crystals", "Sector plates", { count: 6, rot: 30, r0: 0.1, r1: 0.5, shape: "kite", cw: 0.14, widest: 0.32, ridges: 4, fill: 0.22, spine: false }),
+      ],
+    }),
+    frame: () => ({
+      name: "photo-frame", glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS, on: true, radius: 0.46, overhang: 0.09, icicles: 44 },
+      layers: [
+        L("crystals", "Frost teeth", { count: 48, r0: 0.49, r1: 0.56, shape: "spike", cw: 0.022, alt: 0.55, ridges: 0, spine: false, jitter: 0.4, seed: 3 }),
+        L("arms", "Crystal spokes", { count: 8, r0: 0.47, len: 0.97, branches: 2, bStart: 0.25, bEnd: 0.6, angle: 42, bLen: 0.16, taper: 0.3, bShape: "kite", bWidth: 0.3, tip: "diamond", tipSize: 0.07, lozenges: 1, lozSize: 0.05, width: 3 }),
+        L("crystals", "Leaf clusters", { count: 8, rot: 22.5, r0: 0.5, r1: 0.8, shape: "kite", cw: 0.07, widest: 0.45, ridges: 3, spine: true }),
+        L("crystals", "Side shards", { count: 16, rot: 11.25, r0: 0.52, r1: 0.68, shape: "shard", cw: 0.035, widest: 0.5, ridges: 1, spine: false, seed: 9 }),
+      ],
+    }),
+    fern: () => ({
+      name: "fern-dendrite", glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS },
+      layers: [
+        L("plate", "Core", { radius: 0.09, rings: 2, spokes: true }),
+        L("arms", "Fern arms", { len: 0.97, branches: 7, bStart: 0.15, bEnd: 0.85, angle: 60, bLen: 0.34, taper: 0.8, bShape: "fern", fronds: 5, tip: "hex", tipSize: 0.05, lozenges: 0, width: 2 }),
+        L("arms", "Between arms", { rot: 30, r0: 0.08, len: 0.5, branches: 3, bStart: 0.3, bEnd: 0.8, angle: 60, bLen: 0.14, taper: 0.6, bShape: "line", fronds: 2, tip: "diamond", tipSize: 0.04, lozenges: 0, width: 1.4 }),
+      ],
+    }),
+    plate: () => ({
+      name: "sectored-plate", glowColor: "#FFFFFF", glow: 1, photo: { ...PHOTO_DEFAULTS },
+      layers: [
+        L("plate", "Inner hexagon", { radius: 0.3, rings: 4, ridges: 0, spokes: true }),
+        L("crystals", "Sectors", { count: 6, r0: 0.05, r1: 0.62, shape: "kite", cw: 0.2, widest: 0.62, ridges: 5, fill: 0.2 }),
+        L("arms", "Ribs", { len: 0.82, branches: 4, bStart: 0.45, bEnd: 0.9, angle: 60, bLen: 0.1, taper: 0.2, bShape: "plate", bWidth: 0.4, tip: "hex", tipSize: 0.06, lozenges: 0 }),
+        L("plate", "Outer hexagon", { radius: 0.62, rings: 1, ridges: 0, fill: 0.06, spokes: false }),
+      ],
+    }),
+    sparkle: () => ({
+      name: "sparkle", glowColor: "#FFFFFF", glow: 1.2, photo: { ...PHOTO_DEFAULTS },
+      layers: [
+        L("plate", "Heart", { radius: 0.1, rings: 2, star: 0.45, sides: 6 }),
+        L("arms", "Arms", { len: 0.95, branches: 2, bStart: 0.4, bEnd: 0.7, angle: 45, bLen: 0.2, taper: 0.3, bShape: "line", tip: "diamond", tipSize: 0.12, lozenges: 0, width: 3 }),
+        L("arms", "Glints", { rot: 30, len: 0.45, branches: 0, tip: "spear", tipSize: 0.08, lozenges: 0, width: 2 }),
+      ],
+    }),
+  };
+
+  const MINI = {
+    star: { count: 6, rot: 0, r0: 0, len: 1, rails: false, branches: 2, bStart: 0.35, bEnd: 0.65, angle: 55, bLen: 0.35, taper: 0.4, bShape: "line", bWidth: 0.2, fronds: 0, tip: "diamond", tipSize: 0.16, lozenges: 0, lozSize: 0.05 },
+    fern: { count: 6, rot: 0, r0: 0, len: 1, rails: false, branches: 4, bStart: 0.2, bEnd: 0.8, angle: 60, bLen: 0.4, taper: 0.8, bShape: "line", bWidth: 0.2, fronds: 0, tip: "none", tipSize: 0.1, lozenges: 0, lozSize: 0.05 },
+    plate: { count: 6, rot: 0, r0: 0, len: 1, rails: false, branches: 1, bStart: 0.4, bEnd: 0.4, angle: 50, bLen: 0.45, taper: 0, bShape: "kite", bWidth: 0.32, fronds: 0, tip: "hex", tipSize: 0.13, lozenges: 0, lozSize: 0.05 },
+  };
+
+  /* ================= control schemas ================= */
+  const R = (k, label, min, max, step, fmt) => ({ k, label, t: "range", min, max, step, fmt });
+  const S = (k, label, options) => ({ k, label, t: "select", options });
+  const B = (k, label) => ({ k, label, t: "check" });
+  const pct = v => Math.round(v * 100) + "%";
+  const deg = v => (+v).toFixed(1).replace(".0", "") + "°";
+  const SHAPES = [["kite", "Kite"], ["leaf", "Leaf"], ["shard", "Shard"], ["spike", "Spike"], ["arrow", "Arrowhead"], ["chevron", "Chevron"], ["hex", "Hex plate"]];
+  const TIPS = [["none", "None"], ["diamond", "Diamond"], ["spear", "Spear"], ["arrow", "Arrowhead"], ["hex", "Hex plate"], ["trident", "Trident"], ["star", "Star burst"]];
+  const SCHEMA = {
+    arms: [
+      ["Structure", [R("count", "Number of arms", 2, 24, 1), R("rot", "Rotation", 0, 180, 0.5, deg), R("r0", "Starts at radius", 0, 0.9, 0.005, pct), R("len", "Reaches radius", 0.05, 1.05, 0.005, pct), B("rails", "Double spine")]],
+      ["Branches", [R("branches", "Branches per side", 0, 14, 1), R("bStart", "First branch at", 0, 1, 0.01, pct), R("bEnd", "Last branch at", 0, 1, 0.01, pct), R("angle", "Branch angle", 10, 90, 0.5, deg), R("bLen", "Branch length", 0, 0.7, 0.005, pct), R("taper", "Taper toward tip", -1, 1, 0.05), S("bShape", "Branch shape", [["line", "Line"], ["fern", "Fern"], ["needle", "Needle"], ["plate", "Plate-tipped"], ...SHAPES]), R("bWidth", "Branch fullness", 0.05, 0.7, 0.01), R("fronds", "Fronds on each branch", 0, 10, 1)]],
+      ["Tip and beads", [S("tip", "Tip shape", TIPS), R("tipSize", "Tip size", 0, 0.25, 0.005), R("lozenges", "Beads on spine", 0, 5, 1), R("lozSize", "Bead size", 0.01, 0.14, 0.005)]],
+    ],
+    crystals: [
+      ["Placement", [R("count", "Number of crystals", 2, 96, 1), R("rot", "Rotation", 0, 180, 0.25, deg), R("r0", "Inner radius", 0, 1.1, 0.005, pct), R("r1", "Outer radius", 0, 1.1, 0.005, pct), S("dir", "Pointing", [["out", "Outward"], ["in", "Inward"], ["both", "Both ways"]])]],
+      ["Shape", [S("shape", "Crystal shape", [...SHAPES, ["flake", "Tiny snowflake"]]), R("cw", "Crystal width", 0.005, 0.4, 0.001), R("widest", "Widest point", 0.05, 0.95, 0.01, pct), R("alt", "Every other crystal", 0.1, 1, 0.01, pct), R("jitter", "Irregularity", 0, 1, 0.01, pct), R("seed", "Variation", 1, 200, 1), B("spine", "Centre line"), S("flakeStyle", "Tiny snowflake style", [["star", "Star"], ["fern", "Fern"], ["plate", "Plate"]])]],
+    ],
+    plate: [["Plate", [R("sides", "Sides", 3, 12, 1), R("radius", "Radius", 0.02, 0.9, 0.005, pct), R("rings", "Nested rings", 1, 8, 1), R("rot", "Rotation", 0, 60, 0.5, deg), R("star", "Star points", 0, 0.95, 0.01, v => v > 0 ? pct(v) : "off"), B("spokes", "Spokes to corners")]]],
+    ring: [["Ring", [R("radius", "Radius", 0.02, 1.1, 0.005, pct), S("sides", "Outline", [["0", "Circle"], ["6", "Hexagon"], ["8", "Octagon"], ["12", "12-sided"]]), R("rot", "Rotation", 0, 60, 0.5, deg), B("double", "Double line"), R("gap", "Double-line gap", 0.004, 0.06, 0.001, pct), B("dash", "Dotted")]]],
+  };
+  const STYLE_SCHEMA = [
+    { k: "color", label: "Line colour", t: "color" }, { k: "tint", label: "Fill colour", t: "color" }, { k: "facet", label: "Facet highlight", t: "color" },
+    R("width", "Line weight", 0.3, 8, 0.1), R("fill", "Fill opacity", 0, 0.9, 0.01, pct), R("ridges", "Etched facets", 0, 6, 1),
+    R("glow", "Glow", 0, 2, 0.05), R("opacity", "Layer opacity", 0, 1, 0.01, pct),
+  ];
+  const PHOTO_SCHEMA = [R("radius", "Photo radius", 0.1, 0.8, 0.005, pct), R("rim", "Ice rim width", 0, 0.12, 0.002, pct), R("overhang", "Icicle overhang", 0, 0.2, 0.002, pct), R("icicles", "Icicles", 8, 90, 1), R("seed", "Variation", 1, 200, 1), R("fill", "Ice opacity", 0, 0.9, 0.01, pct), R("width", "Line weight", 0.3, 6, 0.1), R("ridges", "Etched facets", 0, 3, 1)];
+
+  /* ================= geometry ================= */
+  function mulberry32(a) {
+    return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+  const polar = (r, a) => [r * Math.sin(a), r * Math.cos(a)]; // a = 0 points up, clockwise
+  function place(pts, o, a) { // local +y runs along direction a
+    const s = Math.sin(a), c = Math.cos(a);
+    return pts.map(([x, y]) => [o[0] + x * c + y * s, o[1] - x * s + y * c]);
+  }
+  const along = (o, a, d) => [o[0] + d * Math.sin(a), o[1] + d * Math.cos(a)];
+  function hexPts(cx, cy, r, rot = 0, n = 6) {
+    const p = []; for (let i = 0; i < n; i++) p.push([cx + r * Math.sin(rot + i * TAU / n), cy + r * Math.cos(rot + i * TAU / n)]); return p;
+  }
+  function shapePts(kind, len, w, wp = 0.4) {
+    switch (kind) {
+      case "leaf": {
+        const n = 12, k = Math.log(0.5) / Math.log(Math.min(0.95, Math.max(0.05, wp))), side = [];
+        for (let i = 0; i <= n; i++) { const u = i / n; side.push([w * Math.pow(Math.sin(Math.PI * Math.pow(u, k)), 0.85), len * u]); }
+        return side.concat(side.slice(1, -1).reverse().map(([x, y]) => [-x, y]));
+      }
+      case "shard": return [[0, 0], [w, len * wp], [w * 0.35, len * 0.88], [0, len], [-w * 0.55, len * wp * 0.75]];
+      case "spike": return [[-w * 0.5, 0], [0, len], [w * 0.5, 0]];
+      case "arrow": return [[0, len], [w, len * 0.6], [w * 0.28, len * 0.7], [w * 0.28, 0], [-w * 0.28, 0], [-w * 0.28, len * 0.7], [-w, len * 0.6]];
+      case "chevron": return [[0, len], [w, len * 0.35], [w * 0.72, len * 0.22], [0, len * 0.72], [-w * 0.72, len * 0.22], [-w, len * 0.35]];
+      case "hex": { const r = Math.min(w * 1.15, len / 2); return hexPts(0, len / 2, r); }
+      default: return [[0, 0], [w, len * wp], [0, len], [-w, len * wp]]; // kite
+    }
+  }
+
+  /* ================= ink: collects SVG paths for one layer ================= */
+  const X = x => (C + K * x).toFixed(1), Y = y => (C - K * y).toFixed(1);
+  const pathD = (pts, closed) => "M" + pts.map(p => X(p[0]) + " " + Y(p[1])).join("L") + (closed ? "Z" : "");
+  class Ink {
+    constructor(st, glowColor, glowAll) { this.st = st; this.gc = glowColor; this.g = glowAll * st.glow; this.ws = 1; this.strokes = new Map(); this.fills = []; }
+    _s(rank, color, w, a, d) {
+      if (a <= 0.002 || w <= 0) return;
+      const key = rank + "|" + color + "|" + w.toFixed(2) + "|" + Math.min(1, a).toFixed(3);
+      let arr = this.strokes.get(key); if (!arr) this.strokes.set(key, arr = []); arr.push(d);
+    }
+    strokeD(d, wm = 1, am = 1) {
+      const st = this.st, w = st.width * wm * this.ws, a = st.opacity * am;
+      if (this.g > 0) { this._s(0, this.gc, w * 5, 0.09 * this.g * a, d); this._s(1, this.gc, w * 2.4, 0.22 * this.g * a, d); }
+      this._s(2, st.color, w, 0.95 * a, d);
+    }
+    line(pts, wm = 1, am = 1) { this.strokeD(pathD(pts, false), wm, am); }
+    shape(pts, { ridges = this.st.ridges, fm = 1, wm = 0.7 } = {}) {
+      const st = this.st, d = pathD(pts, true), fa = st.fill * fm * st.opacity;
+      if (fa > 0.002) this.fills.push(`<path fill="${st.tint}" fill-opacity="${Math.min(1, fa).toFixed(3)}" d="${d}"/>`);
+      this.strokeD(d, wm, 0.9);
+      if (ridges > 0) {
+        let cx = 0, cy = 0; for (const p of pts) { cx += p[0]; cy += p[1]; } cx /= pts.length; cy /= pts.length;
+        for (let j = 1; j <= ridges; j++) {
+          const k = 1 - j * (0.8 / (ridges + 1));
+          this._s(3, st.facet, st.width * wm * 0.6 * this.ws, 0.75 * st.opacity, pathD(pts.map(([x, y]) => [cx + (x - cx) * k, cy + (y - cy) * k]), true));
+        }
+      }
+    }
+    fillD(d, am = 1) {
+      const fa = this.st.fill * am * this.st.opacity;
+      if (fa > 0.002) this.fills.push(`<path fill="${this.st.tint}" fill-opacity="${Math.min(1, fa).toFixed(3)}" fill-rule="evenodd" d="${d}"/>`);
+    }
+    out() {
+      const strokes = [...this.strokes.entries()].map(([k, ds]) => { const [rank, color, w, a] = k.split("|"); return { rank: +rank, color, w: +w, a, ds }; })
+        .sort((p, q) => p.rank - q.rank || q.w - p.w)
+        .map(s => `<path fill="none" stroke="${s.color}" stroke-width="${s.w}" stroke-opacity="${s.a}" stroke-linecap="round" stroke-linejoin="round" d="${s.ds.join("")}"/>`);
+      return this.fills.join("") + strokes.join("");
+    }
+    count() { let n = this.fills.length; for (const ds of this.strokes.values()) n += ds.length; return n; }
+  }
+
+  /* ================= layer drawing ================= */
+  function drawBranch(ink, kind, base, ang, len, wr, fronds) {
+    const tip = along(base, ang, len);
+    if (kind === "line" || kind === "fern") ink.line([base, tip], 0.8);
+    else if (kind === "needle") {
+      ink.line([base, tip], 0.8);
+      ink.shape(place(shapePts("kite", len * 0.38, len * 0.08, 0.5), along(base, ang, len * 0.62), ang), { ridges: Math.min(1, ink.st.ridges) });
+    } else if (kind === "plate") {
+      const r = Math.max(0.004, len * wr * 0.55);
+      ink.line([base, along(base, ang, len - r)], 0.8);
+      ink.shape(place(hexPts(0, len - r, r), base, ang), { ridges: Math.min(1, ink.st.ridges) });
+    } else {
+      ink.shape(place(shapePts(kind, len, len * wr, 0.4), base, ang));
+      ink.line([base, along(base, ang, len * 0.92)], 0.55, 0.8);
+    }
+    const nf = kind === "fern" ? Math.max(3, fronds) : fronds;
+    for (let j = 0; j < nf; j++) {
+      const v = (j + 1) / (nf + 1), p = along(base, ang, len * v), fl = len * 0.38 * (1 - v) + 0.004;
+      for (const s of [1, -1]) ink.line([p, along(p, ang + s * 60 * D2R, fl)], 0.55, 0.85);
+    }
+  }
+
+  function drawTip(ink, kind, end, a, ts) {
+    if (kind === "none" || ts <= 0) return;
+    const back = d => along(end, a, -d);
+    if (kind === "diamond") ink.shape(place(shapePts("kite", ts * 2.4, ts * 0.6, 0.45), back(ts * 1.2), a));
+    else if (kind === "spear") ink.shape(place(shapePts("kite", ts * 3.2, ts * 0.34, 0.62), back(ts * 2.2), a));
+    else if (kind === "arrow") ink.shape(place(shapePts("arrow", ts * 2.2, ts * 0.9), back(ts * 1.4), a));
+    else if (kind === "hex") ink.shape(place(hexPts(0, 0, ts * 0.9), end, a));
+    else if (kind === "trident") {
+      for (const [da, k] of [[0, 2.4], [28, 1.5], [-28, 1.5]]) ink.shape(place(shapePts("kite", ts * k, ts * 0.3, 0.3), back(ts * 0.4), a + da * D2R), { ridges: Math.min(1, ink.st.ridges) });
+    } else if (kind === "star") {
+      for (let i = 0; i < 6; i++) ink.line([end, along(end, a + i * 60 * D2R, ts)], 0.7);
+      ink.shape(hexPts(end[0], end[1], ts * 0.35, a), { ridges: 0 });
+    }
+  }
+
+  function drawArms(ink, p, cx = 0, cy = 0, sc = 1, rot0 = 0) {
+    const n = Math.round(p.count);
+    for (let k = 0; k < n; k++) {
+      const a = rot0 + (p.rot + k * 360 / n) * D2R;
+      const ax = t => [cx + sc * t * Math.sin(a), cy + sc * t * Math.cos(a)];
+      if (p.rails) {
+        const g = 0.008 * sc;
+        ink.line(place([[-g, p.r0 * sc], [-g, p.len * sc]], [cx, cy], a), 0.7);
+        ink.line(place([[g, p.r0 * sc], [g, p.len * sc]], [cx, cy], a), 0.7);
+      } else ink.line([ax(p.r0), ax(p.len)], 1);
+      const nb = Math.round(p.branches), span = p.len - p.r0;
+      for (let i = 0; i < nb; i++) {
+        const u = nb === 1 ? 0 : i / (nb - 1);
+        const t = p.r0 + span * (p.bStart + (p.bEnd - p.bStart) * u);
+        const bl = Math.max(0.005, p.bLen * (1 - p.taper * u)) * sc;
+        for (const s of [1, -1]) drawBranch(ink, p.bShape, ax(t), a + s * p.angle * D2R, bl, p.bWidth, Math.round(p.fronds));
+      }
+      const nl = Math.round(p.lozenges);
+      for (let j = 0; j < nl; j++) {
+        const t = p.r0 + span * (nl === 1 ? 0.52 : 0.3 + 0.45 * j / (nl - 1));
+        ink.shape(place(shapePts("kite", p.lozSize * 2 * sc, p.lozSize * 0.42 * sc, 0.5), ax(t - p.lozSize), a));
+      }
+      drawTip(ink, p.tip, ax(p.len), a, p.tipSize * sc);
+    }
+  }
+
+  function drawCrystals(ink, p) {
+    const rnd = mulberry32(Math.round(p.seed) * 7919), n = Math.round(p.count);
+    for (let i = 0; i < n; i++) {
+      let a = (p.rot + i * 360 / n) * D2R;
+      const sc = (i % 2 === 1) ? p.alt : 1, j = 1 - p.jitter * rnd() * 0.6;
+      a += (rnd() - 0.5) * p.jitter * (TAU / n) * 0.4;
+      const span = (p.r1 - p.r0) * sc * j, w = p.cw * sc;
+      if (Math.abs(span) < 0.002) continue;
+      if (p.shape === "flake") {
+        const c = polar((p.r0 + p.r1) / 2, a), s = Math.abs(p.r1 - p.r0) / 2 * sc * j;
+        ink.ws = Math.max(0.35, Math.min(1, s * 5));
+        drawArms(ink, MINI[p.flakeStyle] || MINI.star, c[0], c[1], s, a);
+        ink.ws = 1;
+        continue;
+      }
+      const parts = p.dir === "in" ? [[p.r0 + span, a + Math.PI, span]]
+        : p.dir === "both" ? [[p.r0 + span / 2, a, span / 2], [p.r0 + span / 2, a + Math.PI, span / 2]]
+        : [[p.r0, a, span]];
+      for (const [r, ang, len] of parts) {
+        const base = polar(r, a);
+        ink.shape(place(shapePts(p.shape, len, w, p.widest), base, ang));
+        if (p.spine) ink.line([base, along(base, ang, len * 0.94)], 0.55, 0.8);
+      }
+    }
+  }
+
+  function drawPlate(ink, p) {
+    const n = Math.round(p.sides), rings = Math.round(p.rings), rot = p.rot * D2R;
+    for (let j = 1; j <= rings; j++) {
+      const r = p.radius * j / rings, pts = [], m = p.star > 0 ? n * 2 : n;
+      for (let v = 0; v < m; v++) pts.push(polar(p.star > 0 && v % 2 ? r * p.star : r, rot + v * TAU / m));
+      ink.shape(pts, { fm: j === rings ? 1 : 0.5, ridges: j === rings ? p.ridges : 0 });
+    }
+    if (p.spokes) for (let v = 0; v < n; v++) ink.line([[0, 0], polar(p.radius, rot + v * TAU / n)], 0.6, 0.8);
+  }
+
+  function circleD(r) {
+    const rp = (K * r).toFixed(1);
+    return `M${X(-r)} ${Y(0)}A${rp} ${rp} 0 1 0 ${X(r)} ${Y(0)}A${rp} ${rp} 0 1 0 ${X(-r)} ${Y(0)}Z`;
+  }
+  function drawRing(ink, p) {
+    const draw = (r, wm) => {
+      const n = +p.sides;
+      if (p.dash) {
+        const m = Math.max(12, Math.round(TAU * r / 0.028));
+        for (let i = 0; i < m; i++) { const a = p.rot * D2R + i * TAU / m; ink.line([polar(r, a), polar(r, a + 0.0001)], wm * 1.6); }
+      } else if (n >= 3) ink.shape(hexPts(0, 0, r, p.rot * D2R, n), { ridges: 0, fm: 0, wm });
+      else ink.strokeD(circleD(r), wm);
+    };
+    draw(p.radius, 1);
+    if (p.double) draw(p.radius + p.gap, 0.5);
+  }
+
+  function drawPhoto(ink, ph) {
+    const rnd = mulberry32(Math.round(ph.seed) * 104729), rp = ph.radius, rw = ph.rim, n = Math.round(ph.icicles);
+    const outer = [], inner = [], tips = [];
+    const m = n * 2;
+    for (let i = 0; i < m; i++) outer.push(polar(rp + rw * (0.8 + 0.4 * rnd()), i * TAU / m));
+    for (let i = 0; i < n; i++) {
+      const a0 = i * TAU / n, a1 = (i + 1) * TAU / n, ta = a0 + (a1 - a0) * (0.3 + 0.4 * rnd());
+      const len = ph.overhang * (0.2 + 0.8 * Math.pow(rnd(), 1.4));
+      inner.push(polar(rp + rw * 0.15 * rnd(), a0));
+      if (rnd() < 0.35) { // a shoulder crystal on the way down
+        const sa = a0 + (ta - a0) * 0.5; inner.push(polar(rp - len * 0.35, sa)); inner.push(polar(rp - len * 0.15, sa + (ta - a0) * 0.2));
+      }
+      inner.push(polar(rp - len, ta));
+      tips.push([ta, len]);
+    }
+    ink.fillD(pathD(outer, true) + pathD(inner.slice().reverse(), true));
+    ink.strokeD(pathD(outer, true), 0.7, 0.8);
+    ink.strokeD(pathD(inner, true), 1, 1);
+    if (ph.ridges > 0) {
+      for (const [ta, len] of tips) ink._s(3, ink.st.facet, ink.st.width * 0.5, 0.8, pathD([polar(rp + rw * 0.5, ta), polar(rp - len * 0.75, ta)], false));
+      if (ph.ridges > 1) ink._s(3, ink.st.facet, ink.st.width * 0.45, 0.6, pathD(inner.map(([x, y]) => [x * 1.035, y * 1.035]), true));
+      if (ph.ridges > 2) ink._s(3, ink.st.facet, ink.st.width * 0.4, 0.5, pathD(outer.map(([x, y]) => [x * 0.985, y * 0.985]), true));
+    }
+    // glints scattered on the rim
+    for (let i = 0; i < n / 2; i++) {
+      const a = rnd() * TAU, base = polar(rp + rw * (0.2 + 0.5 * rnd()), a);
+      ink.shape(place(shapePts("kite", rw * 1.4, rw * 0.28, 0.4), base, a + (rnd() - 0.5) * 1.2), { ridges: 0, fm: 1.2, wm: 0.45 });
+    }
+  }
+  const photoCut = ph => ph.radius + ph.rim * 0.35;
+
+  /* ================= SVG assembly ================= */
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const slug = s => (String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "layer");
+
+  function buildSVG(doc, { px = SIZE, preview = false } = {}) {
+    let groups = [], count = 0;
+    for (let i = doc.layers.length - 1; i >= 0; i--) { // bottom of the list draws first
+      const l = doc.layers[i];
+      if (!l.visible) continue;
+      const ink = new Ink(l, doc.glowColor, doc.glow);
+      ({ arms: drawArms, crystals: drawCrystals, plate: drawPlate, ring: drawRing })[l.type](ink, l);
+      count += ink.count();
+      groups.push(`<g id="${slug(l.name)}-${i + 1}">${ink.out()}</g>`);
+    }
+    let body = groups.join("\n"), defs = "";
+    if (doc.photo.on) {
+      const cut = photoCut(doc.photo);
+      defs = `<defs><clipPath id="photo-cut"><path clip-rule="evenodd" d="M0 0H${SIZE}V${SIZE}H0Z${circleD(cut)}"/></clipPath></defs>`;
+      body = `<g clip-path="url(#photo-cut)">${body}</g>`;
+      const ps = { ...doc.layers.find(l => l.visible) || STYLE_DEFAULTS, ...doc.photo, glow: 1, opacity: 1 };
+      const pink = new Ink(ps, doc.glowColor, doc.glow);
+      drawPhoto(pink, doc.photo);
+      count += pink.count();
+      body += `\n<g id="photo-rim">${pink.out()}</g>`;
+      if (preview) body += `<circle cx="${C}" cy="${C}" r="${(K * cut).toFixed(1)}" fill="none" stroke="#8599C2" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.8"/>`;
+    }
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${px}" height="${px}" viewBox="0 0 ${SIZE} ${SIZE}">\n<title>${esc(doc.name)}</title>\n${defs}${body}\n</svg>`;
+    return { svg, count };
+  }
+
+  /* ================= state ================= */
+  let doc, selId, undoStack = [], committed = "";
+  const clone = o => JSON.parse(JSON.stringify(o));
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem("lfts-doc") || "null"); if (s && Array.isArray(s.layers)) return s; } catch (e) {}
+    return PRESETS.arendelle();
+  }
+  function reuid(d) { d.layers.forEach(l => { l.id = "L" + (uid++); }); return d; }
+  doc = reuid(load());
+  doc.photo = { ...PHOTO_DEFAULTS, ...doc.photo };
+  selId = doc.layers[0]?.id;
+  committed = JSON.stringify(doc);
+
+  function commit() {
+    const s = JSON.stringify(doc);
+    if (s !== committed) { undoStack.push(committed); if (undoStack.length > 80) undoStack.shift(); committed = s; }
+    $("undoBtn").disabled = !undoStack.length;
+    try { localStorage.setItem("lfts-doc", s); } catch (e) {}
+  }
+  function undo() {
+    if (!undoStack.length) return;
+    committed = undoStack.pop(); doc = JSON.parse(committed);
+    if (!doc.layers.some(l => l.id === selId)) selId = doc.layers[0]?.id;
+    $("undoBtn").disabled = !undoStack.length;
+    try { localStorage.setItem("lfts-doc", committed); } catch (e) {}
+    renderAll();
+  }
+
+  /* ================= UI ================= */
+  const $ = id => document.getElementById(id);
+  const sel = () => doc.layers.find(l => l.id === selId);
+  let rafPending = false;
+  function redraw() {
+    if (rafPending) return; rafPending = true;
+    requestAnimationFrame(() => {
+      rafPending = false;
+      const { svg, count } = buildSVG(doc, { preview: true });
+      $("board").innerHTML = svg;
+      $("stats").textContent = `${doc.layers.filter(l => l.visible).length} layers · ${count.toLocaleString()} shapes`;
+      photoNote();
+    });
+  }
+  function photoNote() {
+    const n = $("photoNote");
+    if (!doc.photo.on) { n.textContent = "Turn this on to cut a round opening in the middle with icicles hanging over its edge."; return; }
+    const d = 2 * photoCut(doc.photo) * K / SIZE * 100;
+    n.innerHTML = `In Canva, put your photo in a circle frame <b>${d.toFixed(1)}%</b> of this graphic's width, centred underneath it. The dashed guide shows the edge and is not exported.`;
+  }
+
+  function control(c, obj, onChange, prefix) {
+    const id = prefix + "-" + c.k, wrap = document.createElement("div");
+    wrap.className = "ctl" + (c.t === "check" ? " check" : "");
+    const lab = document.createElement("label"); lab.htmlFor = id; lab.textContent = c.label; wrap.appendChild(lab);
+    let input;
+    if (c.t === "range") {
+      const out = document.createElement("output"); out.htmlFor = id; wrap.appendChild(out);
+      input = document.createElement("input"); input.type = "range"; input.min = c.min; input.max = c.max; input.step = c.step; input.value = obj[c.k];
+      const show = () => { out.textContent = c.fmt ? c.fmt(+input.value) : (+input.value).toFixed(c.step >= 1 ? 0 : 2); };
+      show();
+      input.addEventListener("input", () => { obj[c.k] = +input.value; show(); onChange(false); });
+      input.addEventListener("change", () => onChange(true));
+    } else if (c.t === "select") {
+      input = document.createElement("select");
+      for (const [v, t] of c.options) { const o = document.createElement("option"); o.value = v; o.textContent = t; input.appendChild(o); }
+      input.value = String(obj[c.k]);
+      input.addEventListener("change", () => { obj[c.k] = isNaN(+input.value) || input.value === "" ? input.value : +input.value; onChange(true); });
+    } else if (c.t === "check") {
+      input = document.createElement("input"); input.type = "checkbox"; input.checked = !!obj[c.k];
+      input.addEventListener("change", () => { obj[c.k] = input.checked; onChange(true); });
+    } else {
+      input = document.createElement("input"); input.type = "color"; input.value = obj[c.k];
+      input.addEventListener("input", () => { obj[c.k] = input.value; onChange(false); });
+      input.addEventListener("change", () => onChange(true));
+    }
+    input.id = id; wrap.appendChild(input);
+    return wrap;
+  }
+  const changed = done => { redraw(); if (done) { commit(); renderLayers(); } };
+
+  function renderProps() {
+    const box = $("props"); box.textContent = "";
+    const l = sel();
+    if (!l) { box.innerHTML = '<p class="note">Add a layer to start building.</p>'; return; }
+    const head = document.createElement("section");
+    head.innerHTML = `<h2>${esc(TYPE_NAMES[l.type])} layer</h2>`;
+    const nameCtl = document.createElement("div"); nameCtl.className = "ctl";
+    nameCtl.innerHTML = '<label for="layerName">Layer name</label>';
+    const ni = document.createElement("input"); ni.type = "text"; ni.id = "layerName"; ni.value = l.name;
+    ni.addEventListener("input", () => { l.name = ni.value; renderLayers(); });
+    ni.addEventListener("change", () => commit());
+    nameCtl.appendChild(ni); head.appendChild(nameCtl); box.appendChild(head);
+    for (const [title, ctls] of SCHEMA[l.type]) {
+      const g = document.createElement("section"); g.className = "group";
+      g.innerHTML = `<h3>${title}</h3>`;
+      for (const c of ctls) {
+        if (c.k === "flakeStyle" && l.shape !== "flake") continue;
+        g.appendChild(control(c, l, done => { changed(done); if (done && (c.k === "shape")) renderProps(); }, "p"));
+      }
+      box.appendChild(g);
+    }
+    const g = document.createElement("section"); g.className = "group"; g.innerHTML = "<h3>Colour and finish</h3>";
+    for (const c of STYLE_SCHEMA) g.appendChild(control(c, l, changed, "s"));
+    box.appendChild(g);
+  }
+
+  function renderLayers() {
+    const ul = $("layerList"); ul.textContent = "";
+    doc.layers.forEach(l => {
+      const li = document.createElement("li");
+      li.className = (l.id === selId ? "sel" : "") + (l.visible ? "" : " hidden");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = l.visible; cb.id = "vis-" + l.id;
+      cb.setAttribute("aria-label", "Show " + l.name);
+      cb.addEventListener("change", () => { l.visible = cb.checked; changed(true); });
+      const b = document.createElement("button"); b.type = "button"; b.className = "pick";
+      b.innerHTML = `<span>${esc(l.name || "Untitled")}</span><span class="chip">${esc(TYPE_NAMES[l.type])}</span>`;
+      b.setAttribute("aria-pressed", l.id === selId);
+      b.addEventListener("click", () => { selId = l.id; renderLayers(); renderProps(); });
+      li.append(cb, b); ul.appendChild(li);
+    });
+    const i = doc.layers.findIndex(l => l.id === selId);
+    $("upBtn").disabled = i <= 0; $("downBtn").disabled = i < 0 || i >= doc.layers.length - 1;
+    $("dupBtn").disabled = $("delBtn").disabled = i < 0;
+  }
+
+  function renderDoc() {
+    $("docName").value = doc.name;
+    $("glowColor").value = doc.glowColor;
+    $("glowAll").value = doc.glow; $("glowAllOut").textContent = (+doc.glow).toFixed(2);
+    $("photoOn").checked = doc.photo.on;
+    const pc = $("photoCtls"); pc.textContent = ""; pc.hidden = !doc.photo.on;
+    if (doc.photo.on) for (const c of PHOTO_SCHEMA) pc.appendChild(control(c, doc.photo, changed, "ph"));
+  }
+  function renderAll() { renderDoc(); renderLayers(); renderProps(); redraw(); $("undoBtn").disabled = !undoStack.length; }
+
+  /* ---------- wiring ---------- */
+  $("docName").addEventListener("input", e => { doc.name = e.target.value; });
+  $("docName").addEventListener("change", () => commit());
+  $("glowColor").addEventListener("input", e => { doc.glowColor = e.target.value; redraw(); });
+  $("glowColor").addEventListener("change", () => commit());
+  $("glowAll").addEventListener("input", e => { doc.glow = +e.target.value; $("glowAllOut").textContent = doc.glow.toFixed(2); redraw(); });
+  $("glowAll").addEventListener("change", () => commit());
+  $("bgSel").addEventListener("change", e => { $("board").dataset.bg = e.target.value; try { localStorage.setItem("lfts-bg", e.target.value); } catch (err) {} });
+  try { const bg = localStorage.getItem("lfts-bg"); if (bg) { $("bgSel").value = bg; $("board").dataset.bg = bg; } } catch (e) {}
+  $("photoOn").addEventListener("change", e => { doc.photo.on = e.target.checked; renderDoc(); changed(true); });
+
+  $("paletteSel").addEventListener("change", e => {
+    const p = PALETTES[e.target.value]; if (!p) return;
+    doc.layers.forEach(l => { l.color = p.color; l.tint = p.tint; l.facet = p.facet; });
+    doc.glowColor = p.glow; $("bgSel").value = p.bg; $("board").dataset.bg = p.bg;
+    e.target.value = "";
+    commit(); renderAll(); toast("Palette applied to every layer");
+  });
+  $("presetSel").addEventListener("change", e => {
+    const f = PRESETS[e.target.value]; if (!f) return;
+    const keepColours = doc.layers[0];
+    doc = f();
+    if (keepColours) doc.layers.forEach(l => { l.color = keepColours.color; l.tint = keepColours.tint; l.facet = keepColours.facet; });
+    doc.glowColor = doc.glowColor && keepColours ? $("glowColor").value : doc.glowColor;
+    selId = doc.layers[0].id; e.target.value = "";
+    commit(); renderAll();
+  });
+  $("randomBtn").addEventListener("click", () => {
+    const r = Math.random, pick = a => a[Math.floor(r() * a.length)], base = sel() || STYLE_DEFAULTS;
+    const colours = { color: base.color, tint: base.tint, facet: base.facet };
+    const layers = [];
+    layers.push(L("plate", "Core", { ...colours, radius: 0.08 + r() * 0.12, rings: 1 + Math.floor(r() * 3), star: r() < 0.3 ? 0.5 : 0 }));
+    layers.push(L("arms", "Main arms", { ...colours, branches: 1 + Math.floor(r() * 5), bStart: 0.2 + r() * 0.2, bEnd: 0.6 + r() * 0.25, angle: 40 + r() * 25, bLen: 0.12 + r() * 0.25, taper: r() * 0.9, bShape: pick(["leaf", "kite", "fern", "needle", "shard", "line", "plate"]), bWidth: 0.15 + r() * 0.2, fronds: r() < 0.3 ? Math.floor(r() * 4) : 0, tip: pick(TIPS.slice(1).map(t => t[0])), tipSize: 0.05 + r() * 0.06, lozenges: Math.floor(r() * 3) }));
+    if (r() < 0.75) layers.push(L("arms", "Short arms", { ...colours, rot: 30, r0: 0.05, len: 0.35 + r() * 0.35, branches: Math.floor(r() * 3), bLen: 0.08 + r() * 0.1, bShape: pick(["kite", "line", "leaf", "needle"]), tip: pick(["spear", "diamond", "arrow"]), tipSize: 0.05 + r() * 0.04, lozenges: r() < 0.5 ? 1 : 0, width: 1.6 }));
+    if (r() < 0.7) layers.push(L("crystals", "Sector plates", { ...colours, count: 6, rot: r() < 0.5 ? 30 : 0, r0: 0.06, r1: 0.3 + r() * 0.3, shape: pick(["kite", "leaf", "shard"]), cw: 0.08 + r() * 0.1, widest: 0.3 + r() * 0.2, ridges: 2 + Math.floor(r() * 3), spine: false }));
+    if (r() < 0.4) layers.unshift(L("crystals", "Edge glints", { ...colours, count: pick([12, 18, 24]), r0: 0.86, r1: 1.0, shape: pick(["spike", "kite", "flake"]), cw: 0.03, alt: 0.6, ridges: 1, seed: 1 + Math.floor(r() * 200) }));
+    doc = { name: "snowflake-" + Math.floor(r() * 9000 + 1000), glowColor: doc.glowColor, glow: doc.glow, photo: doc.photo, layers };
+    selId = layers[0].id; commit(); renderAll();
+  });
+  $("undoBtn").addEventListener("click", undo);
+  document.addEventListener("keydown", e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z" && !e.shiftKey && !/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); undo(); }
+  });
+
+  const idx = () => doc.layers.findIndex(l => l.id === selId);
+  $("upBtn").addEventListener("click", () => { const i = idx(); if (i > 0) { [doc.layers[i - 1], doc.layers[i]] = [doc.layers[i], doc.layers[i - 1]]; changed(true); } });
+  $("downBtn").addEventListener("click", () => { const i = idx(); if (i >= 0 && i < doc.layers.length - 1) { [doc.layers[i + 1], doc.layers[i]] = [doc.layers[i], doc.layers[i + 1]]; changed(true); } });
+  $("dupBtn").addEventListener("click", () => { const i = idx(); if (i < 0) return; const c = { ...clone(doc.layers[i]), id: "L" + (uid++), name: doc.layers[i].name + " copy" }; doc.layers.splice(i, 0, c); selId = c.id; changed(true); renderProps(); });
+  $("delBtn").addEventListener("click", () => { const i = idx(); if (i < 0) return; doc.layers.splice(i, 1); selId = doc.layers[Math.min(i, doc.layers.length - 1)]?.id; changed(true); renderProps(); });
+  $("addBtn").addEventListener("click", () => {
+    const t = $("addSel").value, base = sel() || STYLE_DEFAULTS;
+    const l = L(t, TYPE_NAMES[t], { color: base.color, tint: base.tint, facet: base.facet });
+    doc.layers.unshift(l); selId = l.id; changed(true); renderProps();
+  });
+
+  /* ---------- library ---------- */
+  function libGet() { try { return JSON.parse(localStorage.getItem("lfts-library") || "[]"); } catch (e) { return []; } }
+  function libSet(v) { try { localStorage.setItem("lfts-library", JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function renderLibrary() {
+    const ul = $("library"); ul.textContent = "";
+    libGet().forEach((item, i) => {
+      const li = document.createElement("li");
+      const open = document.createElement("button"); open.type = "button"; open.textContent = item.name;
+      open.addEventListener("click", () => { doc = reuid(clone(item.doc)); doc.photo = { ...PHOTO_DEFAULTS, ...doc.photo }; selId = doc.layers[0]?.id; commit(); renderAll(); toast("Opened " + item.name); });
+      const del = document.createElement("button"); del.type = "button"; del.textContent = "Remove"; del.setAttribute("aria-label", "Remove " + item.name);
+      del.addEventListener("click", () => { const v = libGet(); v.splice(i, 1); libSet(v); renderLibrary(); });
+      li.append(open, del); ul.appendChild(li);
+    });
+  }
+  $("saveBtn").addEventListener("click", () => {
+    const v = libGet().filter(x => x.name !== doc.name);
+    v.unshift({ name: doc.name || "untitled", doc: clone(doc) });
+    if (libSet(v.slice(0, 40))) { renderLibrary(); toast("Saved " + doc.name); }
+    else toast("This browser won't let the page store designs. Download the SVG to keep it.");
+  });
+
+  /* ---------- export ---------- */
+  const toastEl = $("toast"); let toastT;
+  function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove("show"), 2600); }
+  let downloadsP = Promise.resolve(null);
+  try { if (window.claude && window.claude.use) downloadsP = window.claude.use("downloads").catch(() => null); } catch (e) {}
+  const fileBase = () => slug(doc.name) || "snowflake";
+
+  async function offer(filename, data) {
+    const dl = await downloadsP;
+    if (dl) {
+      try { await dl.save({ filename, data }); toast("Saved " + filename); }
+      catch (e) {
+        if (e && e.code === "declined") toast("Download cancelled");
+        else if (e && e.code === "rate_limited") toast("A download prompt is already open");
+        else toast("Downloads aren't available here. Use Copy SVG code instead.");
+      }
+      return;
+    }
+    const blob = data instanceof Blob ? data : new Blob([data], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  $("svgBtn").addEventListener("click", () => offer(fileBase() + ".svg", buildSVG(doc).svg));
+  $("pngBtn").addEventListener("click", async () => {
+    const px = +$("pngSize").value, btn = $("pngBtn");
+    btn.disabled = true; btn.textContent = "Rendering…";
+    try {
+      const img = new Image();
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(buildSVG(doc, { px }).svg);
+      await img.decode();
+      const cv = document.createElement("canvas"); cv.width = cv.height = px;
+      cv.getContext("2d").drawImage(img, 0, 0, px, px);
+      const blob = await new Promise((res, rej) => cv.toBlob(b => b ? res(b) : rej(new Error("empty")), "image/png"));
+      await offer(`${fileBase()}-${px}px.png`, blob);
+    } catch (e) { toast("This browser couldn't render the PNG. Download the SVG instead."); }
+    btn.disabled = false; btn.textContent = "Download PNG";
+  });
+  $("copyBtn").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(buildSVG(doc).svg); toast("SVG code copied"); }
+    catch (e) { toast("Your browser blocked the clipboard. Use Download SVG instead."); }
+  });
+
+  renderAll();
+  renderLibrary();
+})();
+</script>
