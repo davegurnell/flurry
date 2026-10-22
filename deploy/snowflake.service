@@ -8,6 +8,8 @@ WorkingDirectory=/home/exedev/snowflake
 ExecStart=/usr/bin/npm run dev
 Restart=on-failure
 Environment=NODE_ENV=development
+Environment=SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+Environment=NODE_OPTIONS=--use-openssl-ca
 
 [Install]
 WantedBy=multi-user.target
