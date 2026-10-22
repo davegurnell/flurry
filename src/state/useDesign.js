@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useReducer } from "react";
-import { historyReducer, initHistory } from "./history.js";
+import { historyReducer, initHistory, applyPalette } from "./history.js";
 import { normalizeDoc } from "../model/defaults.js";
 import { PRESETS, DEFAULT_PRESET } from "../model/presets.js";
+import { PALETTES, DEFAULT_PALETTE } from "../model/palettes.js";
 import { read, write, KEYS } from "../lib/storage.js";
 
 function loadInitial() {
   const saved = read(KEYS.doc, null);
-  return saved && Array.isArray(saved.layers) ? normalizeDoc(saved) : PRESETS[DEFAULT_PRESET].make();
+  return saved && Array.isArray(saved.layers) ? normalizeDoc(saved) : applyPalette(PALETTES[DEFAULT_PALETTE])(PRESETS[DEFAULT_PRESET].make());
 }
 
 /** The current design plus undo, persisted to this browser on every committed change. */

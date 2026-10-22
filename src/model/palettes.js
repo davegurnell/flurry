@@ -7,6 +7,9 @@ export const PALETTES = {
   aurora: { label: "Aurora · violet and teal", color: "#5B4FC4", tint: "#9FE3E0", facet: "#FFFFFF", glow: "#E9F7FF", highlight: "#F2FFFE", shadow: "#4636A8", bg: "frost" },
 };
 
+// What a first-time visitor sees.
+export const DEFAULT_PALETTE = "glacier";
+
 export const BACKGROUNDS = {
   frost: "Pale frost",
   night: "Night blue",

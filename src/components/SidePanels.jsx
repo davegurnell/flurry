@@ -2,7 +2,7 @@ import { useState } from "react";
 import { PALETTES, BACKGROUNDS } from "../model/palettes.js";
 import { PHOTO_SCHEMA, GLOW_SCHEMA, LIGHT_SCHEMA, LINE_WEIGHT_SCHEMA } from "../model/schema.js";
 import { normalizeDoc } from "../model/defaults.js";
-import { patchDoc, patchPhoto, patchLight, recolourAll } from "../state/history.js";
+import { patchDoc, patchPhoto, patchLight, applyPalette } from "../state/history.js";
 import { photoWidthShare } from "../engine/svg.js";
 import { read, write, KEYS } from "../lib/storage.js";
 import { Control, Controls } from "./Control.jsx";
@@ -10,10 +10,10 @@ import { Control, Controls } from "./Control.jsx";
 export function ColourPanel({ design, bg, setBg, toast }) {
   const { doc, edit, commit } = design;
 
-  function applyPalette(key) {
+  function choosePalette(key) {
     const p = PALETTES[key];
     if (!p) return;
-    edit((d) => ({ ...recolourAll(p)(d), glowColor: p.glow, light: { ...d.light, highlight: p.highlight, shadow: p.shadow } }), true);
+    edit(applyPalette(p), true);
     setBg(p.bg);
     toast("Palette applied to every layer");
   }
@@ -23,7 +23,7 @@ export function ColourPanel({ design, bg, setBg, toast }) {
       <h2>Colour</h2>
       <div className="ctl">
         <label htmlFor="paletteSel">Palette for every layer</label>
-        <select id="paletteSel" value="" onChange={(e) => applyPalette(e.target.value)}>
+        <select id="paletteSel" value="" onChange={(e) => choosePalette(e.target.value)}>
           <option value="">Apply a palette…</option>
           {Object.entries(PALETTES).map(([k, p]) => <option key={k} value={k}>{p.label}</option>)}
         </select>

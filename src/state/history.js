@@ -36,6 +36,8 @@ export const patchDoc = (patch) => (d) => ({ ...d, ...patch });
 export const patchPhoto = (patch) => (d) => ({ ...d, photo: { ...d.photo, ...patch } });
 export const patchLight = (patch) => (d) => ({ ...d, light: { ...d.light, ...patch } });
 export const recolourAll = (c) => (d) => ({ ...d, layers: d.layers.map((l) => ({ ...l, color: c.color, tint: c.tint, facet: c.facet })) });
+/** Recolour every layer and take the palette's glow and light colours too. */
+export const applyPalette = (p) => (d) => ({ ...recolourAll(p)(d), glowColor: p.glow, light: { ...d.light, highlight: p.highlight, shadow: p.shadow } });
 
 export function moveLayer(id, delta) {
   return (d) => {

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDesign } from "./state/useDesign.js";
-import { recolourAll } from "./state/history.js";
+import { recolourAll, applyPalette } from "./state/history.js";
 import { PRESETS, randomDesign } from "./model/presets.js";
-import { PALETTES } from "./model/palettes.js";
+import { PALETTES, DEFAULT_PALETTE } from "./model/palettes.js";
 import { read, write, KEYS } from "./lib/storage.js";
 import { TopBar } from "./components/TopBar.jsx";
 import { LayerList } from "./components/LayerList.jsx";
@@ -28,7 +28,7 @@ export default function App() {
   const design = useDesign();
   const { doc, replace, undo } = design;
   const [selId, setSelId] = useState(doc.layers[0]?.id);
-  const [bg, setBgState] = useState(() => read(KEYS.bg, "frost"));
+  const [bg, setBgState] = useState(() => read(KEYS.bg, PALETTES[DEFAULT_PALETTE].bg));
   const [toast, toastEl] = useToast();
 
   // Undo or a new design can remove the selected layer; fall back to the top one.
@@ -42,10 +42,8 @@ export default function App() {
     const palette = PALETTES[preset.palette];
     if (palette) {
       // A preset that is about its colours brings its own palette.
-      next = recolourAll(palette)(next);
-      next.glowColor = palette.glow;
+      next = applyPalette(palette)(next);
       next.lineWeight = doc.lineWeight;
-      next.light = { ...next.light, highlight: palette.highlight, shadow: palette.shadow };
       setBg(palette.bg);
     } else {
       // Otherwise keep the colours and light the user has chosen; presets decide shading on/off.
