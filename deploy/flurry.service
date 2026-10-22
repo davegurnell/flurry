@@ -1,5 +1,5 @@
 [Unit]
-Description=Letters from the Sky (Vite dev server on :8000)
+Description=Flurry (Vite dev server on :8000)
 After=network.target
 
 [Service]

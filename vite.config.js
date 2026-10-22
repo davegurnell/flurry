@@ -9,8 +9,10 @@ const server = {
   allowedHosts: ["snowflake.exe.xyz", ".exe.xyz", "localhost"],
 };
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // GitHub Pages serves the build from https://davegurnell.github.io/flurry/
+  base: command === "build" ? "/flurry/" : "/",
   plugins: [react()],
   server,
   preview: server,
-});
+}));

@@ -1,9 +1,14 @@
-# Letters from the Sky
+# Flurry
 
-A layered snowflake designer for print. Build a snowflake from stacked layers
-(arms, crystal rings, hex plates, rings), optionally cut an icicle-edged photo
-opening in the middle, and export a transparent SVG or a PNG up to 6000 px for
-use in Canva.
+**[Open Flurry →](https://davegurnell.github.io/flurry/)**
+
+A layered snowflake designer for print, originally built for a Frozen-themed
+birthday party. Build a snowflake from stacked layers (arms, crystal rings, hex
+plates, rings), optionally cut an icicle-edged photo opening in the middle, and
+export a transparent SVG or a PNG up to 6000 px for use in Canva.
+
+Everything runs in your browser. Designs are saved to local storage and never
+leave your machine.
 
 ## Running
 
@@ -18,8 +23,8 @@ On this VM the dev server runs as a systemd service, so it survives reboots and
 picks up edits through hot reload:
 
 ```sh
-sudo systemctl status snowflake     # unit file: deploy/snowflake.service
-journalctl -u snowflake -f
+sudo systemctl status flurry        # unit file: deploy/flurry.service
+journalctl -u flurry -f
 ```
 
 ## Layout
@@ -42,7 +47,17 @@ units (the design fits a circle of radius 1) and mapped onto a 1000 × 1000 view
 2. Write a `draw<Type>(ink, layer)` in `src/engine/draw.js` and register it in `DRAW`.
 3. Describe its controls in `LAYER_SCHEMA` in `src/model/schema.js`.
 
+### Deploying
+
+Every push to `main` runs the tests, builds the site and publishes it to GitHub
+Pages via `.github/workflows/pages.yml`. Production builds use the `/flurry/`
+base path (see `vite.config.js`).
+
 ### Export rules
 
 Exports must stay Canva-friendly: plain paths only, no filters, no background
 rect. Glow is built from stacked translucent strokes. The tests enforce this.
+
+## License
+
+Copyright 2026 Dave Gurnell. Licensed under the [Apache License 2.0](LICENSE).

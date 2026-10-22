@@ -45,7 +45,7 @@ export function TopBar({ design, onPreset, onRandom, toast }) {
 
   return (
     <header className="top">
-      <h1 className="brand">Letters from the Sky</h1>
+      <h1 className="brand">Flurry</h1>
       <div className="cluster">
         <label className="note" htmlFor="presetSel">Start from</label>
         <select id="presetSel" value="" onChange={(e) => e.target.value && onPreset(e.target.value)}>
