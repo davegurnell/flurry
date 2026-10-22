@@ -60,4 +60,4 @@ rect. Glow is built from stacked translucent strokes. The tests enforce this.
 
 ## License
 
-Copyright 2026 Dave Gurnell. Licensed under the [Apache License 2.0](LICENSE).
+Copyright 2026 Dave Pereira-Gurnell. Licensed under the [Apache License 2.0](LICENSE).
